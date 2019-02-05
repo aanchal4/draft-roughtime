@@ -62,7 +62,7 @@ RFC7384 SYSTEM
 
     <abstract>
       <t>
-        This document specifies roughtime - a protocol that aims to achieve rough time synchronisation in a secure way that doesn't depend on any particular time server, and in such a way that, if a time server does misbehave, clients end up with cryptographic proof of it.
+        This document specifies Roughtime - a protocol that aims to achieve rough time synchronization while detecting servers that provide inaccurate time and providing cryptographic proof of their malfeasance.
       </t>
     </abstract>
   </front>
@@ -70,7 +70,7 @@ RFC7384 SYSTEM
   <middle>
     <section title="Introduction">
       <t>
-      Roughtime is a protocol for rough time synchronization. To justify the need for roughtime, we would compare it to the existing approaches for time synchronization.  
+      Roughtime is a protocol for rough time synchronization that enables clients to provide cryptographic proof of server malfeasance. It does so by having responses from servers include a signature with a long term public key over a portion of the initial request, thus providing cryptographic proof that the timestamp was issued after previous responses and before future ones.
       </t>
       <t>
       <list style = "bullet">
@@ -88,7 +88,7 @@ RFC7384 SYSTEM
    <ttcol align='center'>Network</ttcol>
    <ttcol align='center'>Unconditional Server</ttcol>
    <ttcol align='center'>Verified Server</ttcol>
-   <ttcol align='center'>Attribution</ttcol>
+   <ttcol align='center'>Server Malfeasance Evidence</ttcol>
    <c>NTP</c>
    <c>NTP</c><c>NTP</c><c>NTP</c><c>NTP</c>
    <c>Chronos</c><c>Chronos</c><c>Chronos</c><c>Chronos</c><c>Chronos</c>
@@ -114,10 +114,10 @@ RFC7384 SYSTEM
 </section>
 <section title = "Protocol Overview">
   <t>
-    Single Server Mode: At its most basic level, Roughtime is a one round protocol in which a comletely fresh client requests the current time and the server sends a signed response. The response is comprised of a timestamp (the number of microseconds since the Unix epoch) and a radius (in microseconds) used to indicate the servers certainty about the reported time. For example, a radius of 1,000,000microsec means the server is reasonably sure that the true time is within one second of the reported time.
+    Single Server Mode: At its most basic level, Roughtime is a one round protocol in which a comletely fresh client requests the current time and the server sends a signed response. The response is comprised of a timestamp (the number of microseconds since the Unix epoch) and a radius (in microseconds) used to indicate the servers certainty about the reported time. For example, a radius of 1,000,000microsec means the server is absolutely confident that the true time is within one second of the reported time.
   </t>
   <t>
-    The server proves freshness of its response as follows. The request consists of a short, random string commonly called a nonce. The server incorporates the nonce into its signed response so that its needed to verify the signature. If the nonce is sufficiently long (say, 16 bytes), then the number of possible nonces is so large that its extremely unlikely the server has encountered (or will ever encounter) a request with the same nonce. Thus, a valid signature serves as cryptographic proof that the response is fresh.
+    The server proves freshness of its response as follows. The request contains a random challenge. The server incorporates the challenge into its signed response so that its needed to verify the signature. This proves that the signed response could only have been generated after the challenge was issued if the challenge has sufficent entropy.
   </t>
   <t>
     The client uses the servers root public key to verify the signature. (The key is obtained out-of-band.) When the server starts, it generates an online public/secret key pair, the root secret key is used to create a delegation for the online public key, and the online secret key is used to sign the response. The delegation serves the same function as a traditional X.509 certificate on the web as illustrated in the figure below, the client first uses the root public key to verify the delegation, then uses the online public key to verify the response. This allows for operational separation of the delegator and the server and limits exposure of the root secret key.
@@ -134,108 +134,123 @@ RFC7384 SYSTEM
   </t>
 </section>
 <section title = "Message Format">
-  TBD
+  A Roughtime packet is a UDP packet containing a map from uint32s to strings of bytes. The byte strings must all
+  have lengths a multiple of four. All uint32 are encoded with the least significant byte first. The keys of this map are called tags.
+
+  A Roughtime packet is serialized as follows: First there is a header.
+  The first four bytes in the header are the uint32 number of tags N, and hence of (tag, value) pairs.
+  4*(N-1) bytes are offsets, each offset a uint32.
+  The last 4*N bytes are the tags.
+
+  Tags are in ascending order, and no tag can be repeated. Offsets are all a multiple of four and MUST be strictly increasing. The offset array is considered
+  to have a not explictly encoded value of length 0.
+
+  Immediately following the header is a concatenation of all the bytes. The first post-header byte is at offset 0, and the end of the final byte string is
+  indicated by the end of the packet. The ith byte string  ends at offset[i+1]-1.
+
+  This encoding may be recursive: a value may be said to be in Roughtime packet format and thus have a header, etc.
+
+  Tags may be listed as four ASCII characters.<xref target="ASCII"/>In this case the tag when serialized will be those four ASCII characters.
 </section>
 
 
-    <section title="Cloudflares Roughtime Service Implementation">
-      <t>
-      TBD
-         
-      </t>
-    </section>
+<section title="Cloudflare's Roughtime Service Implementation">
+  <t>
     
+  </t>
+</section>
 
-    <section anchor="Acknowledgements" title="Acknowledgements">
-      <t>
-        TBD
-      </t>
-    </section>
 
-    <section anchor="IANA" title="IANA Considerations">
-      <t>This memo includes no request to IANA.</t>
-    </section>
+<section anchor="Acknowledgements" title="Acknowledgements">
+  <t>
+    TBD
+  </t>
+</section>
 
-    <section title = "Security Considerations">
-      <t>
-        TBD      
-      </t>
-    </section>
-    <section title = "Privacy Considerations">
-      <t>
-        TBD      
-      </t>
-    </section>
-  </middle>
+<section anchor="IANA" title="IANA Considerations">
+  <t>This memo includes no request to IANA.</t>
+</section>
 
-  <back>
-    <references title="Informative References">
-      &RFC5280;
-      &RFC5905;
-      &RFC7384;
-      &RFC8174;
-      &RFC2119;
+<section title = "Security Considerations">
+  <t>
+    TBD      
+  </t>
+</section>
+<section title = "Privacy Considerations">
+  <t>
+    TBD      
+  </t>
+</section>
+</middle>
 
-      <reference anchor="SECNTP" target="http://eprint.iacr.org/2016/1006">
-        <front>
-          <title>The Security of NTP's Datagram Protocol</title>
-
-          <author initials="A." surname="Malhotra" fullname="A. Malhotra">
+<back>
+  <references title="Informative References">
+    &RFC5280;
+    &RFC5905;
+    &RFC7384;
+    &RFC8174;
+    &RFC2119;
+    
+    <reference anchor="SECNTP" target="http://eprint.iacr.org/2016/1006">
+      <front>
+        <title>The Security of NTP's Datagram Protocol</title>
+        
+        <author initials="A." surname="Malhotra" fullname="A. Malhotra">
             <organization/>
-          </author>
-          <author initials="M. V." surname="Gundy" fullname="M. V. Gundy">
-            <organization/>
-          </author>
-          <author initials="M." surname="Varia" fullname="M. Varia">
-            <organization/>
-          </author>
-          <author initials="H." surname="Kennedy" fullname="H. Kennedy">
-            <organization/>
-          </author>
-          <author initials="J." surname="Gardner" fullname="J. Gardner">
-            <organization/>
+        </author>
+        <author initials="M. V." surname="Gundy" fullname="M. V. Gundy">
+          <organization/>
+        </author>
+        <author initials="M." surname="Varia" fullname="M. Varia">
+          <organization/>
+        </author>
+        <author initials="H." surname="Kennedy" fullname="H. Kennedy">
+          <organization/>
+        </author>
+        <author initials="J." surname="Gardner" fullname="J. Gardner">
+          <organization/>
           </author>
           <author initials="S." surname="Goldberg" fullname="S. Goldberg">
             <organization/>
           </author>
-           <date year="2016"/>
-          </front>
-          </reference>
+          <date year="2016"/>
+      </front>
+    </reference>
+    
+    <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
+      <front>
+        <title>Attacking the Network Time Protocol</title>
+        
+        <author initials="A." surname="Malhotra" fullname="A. Malhotra">
+          <organization/>
+        </author>
+        <author initials="I." surname="Cohen" fullname="I. Cohen">
+          <organization/>
+        </author>
+        <author initials="E." surname="Brakke" fullname="E. Brakke">
+          <organization/>
+        </author>
+        <author initials="S." surname="Goldberg" fullname="S. Goldberg">
+          <organization/>
+        </author>
+        
+        <date year="2015"/>
+      </front>
+    </reference>
+    <reference anchor="CLOCKDRIFT" target="http://downloads.hindawi.com/journals/jcnc/2008/583162.pdf">
+      <front>
+        <title>Internal clock drift estimation in computer clusters</title>
+        
+        <author initials="H." surname="Marouani" fullname="H. Marouani">
+          <organization/>
+        </author>
+        <author initials="M. R." surname="Dagenais" fullname="M. R. Dagenais">
+          <organization/>
+        </author>
+        <date year="2008"/>
+      </front>
+    </reference>
+  </references>
+</back>
 
-      <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
-        <front>
-            <title>Attacking the Network Time Protocol</title>
-
-            <author initials="A." surname="Malhotra" fullname="A. Malhotra">
-              <organization/>
-            </author>
-            <author initials="I." surname="Cohen" fullname="I. Cohen">
-              <organization/>
-            </author>
-            <author initials="E." surname="Brakke" fullname="E. Brakke">
-                <organization/>
-            </author>
-            <author initials="S." surname="Goldberg" fullname="S. Goldberg">
-                <organization/>
-            </author>
-
-            <date year="2015"/>
-        </front>
-      </reference>
-       <reference anchor="CLOCKDRIFT" target="http://downloads.hindawi.com/journals/jcnc/2008/583162.pdf">
-        <front>
-            <title>Internal clock drift estimation in computer clusters</title>
-
-            <author initials="H." surname="Marouani" fullname="H. Marouani">
-                <organization/>
-            </author>
-            <author initials="M. R." surname="Dagenais" fullname="M. R. Dagenais">
-                <organization/>
-            </author>
-            <date year="2008"/>
-        </front>
-      </reference>
-    </references>
-  </back>
-  
 </rfc>
