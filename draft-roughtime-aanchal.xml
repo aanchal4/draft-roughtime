@@ -244,7 +244,9 @@ RFC7384 SYSTEM
 </section>
 <section title="The smeared scale">
   <t>
-    Every day in Roughtime has 84600 seconds. The second is not the SI second. 
+    Every day in Roughtime has 86400 seconds. A day without a leap second is a day where all seconds are SI seconds. A day with a
+    positive leap second is one where every second is 86401/86400 SI seconds long. A day with a negative leap second is a
+    day where every second is 86399/86400 SI seconds long.
   </t>
 </section>
 
