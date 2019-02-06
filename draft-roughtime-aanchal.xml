@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="US-ASCII"?> <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2119 SYSTEM
+"http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml"> <!ENTITY
+RFC5280 SYSTEM
+"http://xml.resource.org/public/rfc/bibxml/reference.RFC.5280.xml"> <!ENTITY
+RFC5905 SYSTEM
+"http://xml.resource.org/public/rfc/bibxml/reference.RFC.5905.xml"> <!ENTITY
+RFC8174 SYSTEM
+"http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml"> <!ENTITY
+RFC7384 SYSTEM
+"http://xml.resource.org/public/rfc/bibxml/reference.RFC.7384.xml">
+<!ENTITY RFC0020 SYSTEM
+"https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0020.xml">
+]>
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc strict="yes"?>
+<?rfc toc="no"?>
+<?rfc tocdepth="3"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+
+<rfc category="info" docName="draft-roughtime-aanchal-00" ipr="trust200902">
+  <front>
+    <title>Roughtime</title>
+
+    <author fullname="Aanchal Malhotra" initials="A." surname="Malhotra">
+        <organization>Boston University</organization>
+        <address>
+            <postal>
+                <street>111 Cummington Mall</street>
+                <city>Boston</city>
+                <region></region>
+                <code>02215</code>
+                <country>USA</country>
+            </postal>
+            <email>aanchal4@bu.edu</email>
+        </address>
+    </author>
+
+    <author fullname="Adam Langly" initials="A." surname="Langly">
+      <organization>Google </organization>
+    </author>
+
+    <author fullname="Watson Ladd" initials="W." surname="Ladd">
+        <organization> Cloudflare</organization>
+        <address>
+            <postal>
+                <street>101 Townsend St</street>
+                <city>San Francisco</city>
+                <region></region>
+                <country>USA</country>
+            </postal>
+            <email>watson@cloudflare.com</email>
+        </address>
+    </author>
+
+    <date year="2019" month="February" day="1"/>
+
+    <area>General</area>
+
+    <workgroup>Internet Engineering Task Force</workgroup>
+
+    <keyword>roughtime</keyword>
+
+    <keyword>time synchronization</keyword>
+
+    <abstract>
+      <t>
+        This document specifies Roughtime - a protocol that aims to achieve rough time synchronization while detecting servers that provide inaccurate time and providing cryptographic proof of their malfeasance.
+      </t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Motivation">
+    
+      <t>
+      <list style = "bullet">
+        <t> NTP client relies on few unauthenticated servers to get time</t>
+        <t> Chronos client relies on a large pool of unauthenticated servers to get time </t>
+        <t> MD5-NTP client uses symmetric-key MAC to authenticate the server</t>
+        <t> ANTP, NTS use TLS-style authentication for server  </t>
+        <t> Roughtime uses PKI-based digital signatures for server authentication (this is essential to achieve the accountability property achieved by the roughtime server.) </t>
+      </list>
+    </t>
+    <t>
+      There are several trust relationships involved when a client tries to get time from a server over the internet. First there is the server and second there is the communication network between the client and the server. The content of time packets is not secret. So to trust the network, the client only needs to verify that the content of the received packet is not modified en route (signature from the server assure that). To trust the server and the content of the packet, the client needs to verify two conditions a) the packet comes from the server that the client thinks that it is coming from (signature from the server assure that) and b) the content in the packet is correct. 
+    </t>
+    <t>
+      And if (b) does not hold, then the client can prove this cryptographically to a third party. Roughtime is the only protocol that provides this last property.
+          </t>
+      <texttable anchor = "existing_approaches">
+        <preamble> TBD </preamble>
+        <ttcol align='center'>Protocol</ttcol>
+   <ttcol align='center'>Trusted Network</ttcol>
+   <ttcol align='center'>Trusted Server</ttcol>
+   <ttcol align='center'>Server Malfeasance Evidence</ttcol>
+   <c>NTP, Chronos</c><c>N</c><c>N</c><c>N</c>
+   <c>NTP-MD5, ANTP, NTS</c><c>Y</c><c>Y</c><c>N</c>
+   <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c>
+        <postamble>   TBD </postamble>
+      </texttable>
+    </section>
+<section title = "Requirements Language">
+  <t>
+    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+      NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+      "MAY", and "OPTIONAL" in this document are to be interpreted as
+      described in BCP 14 <xref target="RFC2119"></xref> <xref target="RFC8174"></xref> when, and only when, they appear in all capitals, as shown here.
+  </t>
+</section>
+<section title = "Terminology">
+  <t>
+    TBD
+  </t>
+</section>
+<section title = "Protocol Overview">
+
+  <t>
+      Roughtime is a protocol for rough time synchronization that enables clients to provide cryptographic proof of server malfeasance. It does so by having responses from servers include a signature with a long term public/private key pair over a portion of the initial request, thus providing cryptographic proof that the timestamp was issued after previous responses and before future ones.
+      </t>
+  <t>
+    Single Server Mode: At its most basic level, Roughtime is a one round protocol in which a completely fresh client requests the current time and the server sends a signed response. The response is comprised of a timestamp (the number of microseconds since the Unix epoch) and a radius (in microseconds) used to indicate the servers certainty about the reported time. For example, a radius of 1,000,000 microsec means the server is absolutely confident that the true time is within one second of the reported time.
+  </t>
+  <t>
+    The server proves freshness of its response as follows. The request contains a random challenge. The server incorporates the challenge into its signed response so that its needed to verify the signature. This proves that the signed response could only have been generated after the challenge was issued if the challenge has sufficent entropy.
+  </t>
+  <t>
+    The client uses the servers root public key to verify the signature. (The key is obtained out-of-band.) When the server starts, it generates an online public/secret key pair, the root secret key is used to create a delegation for the online public key, and the online secret key is used to sign the response. The delegation serves the same function as a traditional X.509 certificate on the web as illustrated in the figure below, the client first uses the root public key to verify the delegation, then uses the online public key to verify the response. This allows for operational separation of the delegator and the server and limits exposure of the root secret key.
+    It knows that its authentic because it has a signature from the server. But if it doesnt completely trust the server it can ask another server for the time.
+  </t>
+  <t>
+    Chaining multiple servers: For the second request, the client generates its nonce by hashing the reply from the first server with a random value. This proves that the nonce was created after the reply from the first server. It sends that to the second server and receives a signature from it covering that nonce and the time from the second server. Let us assume that the times from the two servers are significantly different. 
+  </t>
+  <t>
+    Cryptographic Proof of misbehavior: If the time from the server second server is before the first, then the client has proof of misbehaviour: the reply from the second server implicitly shows that it was created later because of the way that the client constructed the nonce. If the time from the second server is after, then the client can contact the first server again and get a signature that was provably created afterwards, but with an earlier timestamp.
+  </t>
+  <t>
+    With only two servers, the client can end up with proof that something is wrong, but no idea what the correct time is. But with half a dozen or more independent servers, the client will end up with chain of proof of any servers misbehaviour, signed by several others, and (presumably) enough accurate replies to establish what the correct time is.
+  </t>
+</section>
+<section title = "Message Format">
+  <t>
+  A Roughtime packet is a UDP packet containing a map from uint32s to strings of bytes. The byte strings must all
+  have lengths a multiple of four. All uint32 are encoded with the least significant byte first. The keys of this map are called tags.
+  </t>
+  <t>
+  A Roughtime packet is serialized as follows: First there is a header.
+  The first four bytes in the header are the uint32 number of tags N, and hence of (tag, value) pairs.
+  4*(N-1) bytes are offsets, each offset a uint32.
+  The last 4*N bytes are the tags.
+  </t>
+  <t>
+
+  Tags are in ascending order, and no tag can be repeated. Offsets are all a multiple of four and MUST be strictly increasing. The offset array is considered
+  to have a not explictly encoded value of length 0.
+  </t>
+  <t>
+  Immediately following the header is a concatenation of all the bytes. The first post-header byte is at offset 0, and the end of the final byte string is
+  indicated by the end of the packet. The ith byte string  ends at offset[i+1]-1.
+  </t>
+  <t>
+  This encoding may be recursive: a value may be said to be in Roughtime packet format and thus have a header, etc.
+  Tags may be listed as four ASCII characters <xref target="RFC0020"/>. In this case the tag when serialized will be those four ASCII characters. Exempla gratia NONC would be the numeric value 0x434e4f4e.
+  They may also be listed as fewer then four ASCII characters with hex escape codes at the end.
+  </t>
+</section>
+
+<section title="Protocol">
+  <section title="Queries">
+    <t>
+      A query is a Roughtime packet with the tag NONC. The contents of
+      NONC are 64 bytes. The request packet MUST be a minimum of 1024
+      bytes. To attain this size the tag PAD\xff MAY be added at the
+      end of the packet with a conent of all zeros. Other tags MUST be
+      ignored by the server. Future versions may specify additional
+      tags and their semantics, so clients MUST NOT add other tags.
+    </t>
+  </section>
+  <section title="Responses">
+    <t>
+      A response contains the following tags: SREP, SIG\x00, CERT, INDX, PATH,
+      SREP value is itself a packet that  contains the folowing tags: ROOT, MIDP, RADI.     
+      SIG\x00 is an Ed25519 signature of the SREP value with the public key contained in CERT as explained later.
+    </t>
+    <t>
+    
+    CERT is a packet containing the following tags: DELE, SIG\x00.
+    This SIG\x00 is an Ed25519 signature of DELE with the long term public key of the server.
+    DELE is itself a packet containing tags MINT, MAXT, PUBK.
+    </t>
+    <section title="SREP">
+      <t>
+        ROOT contains the root hash value of a Merkele tree using SHA512 as described when we reach the PATH and INDX blocks
+        MIDP contains an uint64 value consisting of the number of microseconds since the Unix epoch in the smeared scale.
+        RADI contains the server's estimate of the accuracy of MIDP. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.
+      </t>
+    </section>
+    <section title="DELE">
+      <t>
+        MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validty.
+        MAXT is the maximum uint64 timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.
+        PUBK is a temporary Ed25519 public key.
+      </t>
+    </section>
+    <section title="INDX and PATH">
+      <t>
+      INDX is a uint32 determining the position of NONC in a Merkel tree. PATH determines the values to be hashed with the running
+      hash as one ascends the tree. The final value MUST be equal to ROOT.
+
+      PATH is a multiple of 64 bytes long. One starts by computing the hash of the NONC value from the request, with \x00 preappended.
+      Then one walks from the least significant bit of INDX to the most significant bit, and also walks towards the end of PATH.
+
+      If PATH ends then the remaining bits of the INDX MUST be all zero. This indicates the termination of the walk.
+
+      If the current bit is 0, one hashes \x01, the current hash, and the value from PATH.
+      If the current bit is 1 one hashes \x01, the value from PATH, and the current HASH.
+      This enables servers to batch signing when busy.
+      </t>
+    </section>
+  </section>
+
+  <section title ="Validity of response">
+    <t>
+    A client MUST check the following properties when it recieves a response. We assume the long term server public key is known
+    to the client through other means.
+
+    <list>
+      <t> The signature in CERT was made with the long-term key of the server</t>
+      <t> The DELE timestamps and the MIDP value are consistent</t>
+      <t> The INDX and PATH values prove NONC was included in the Merkel tree with value ROOT</t>
+      <t> The signature of SREP in SIG\x00 was made with the public key in DELE and is valid</t>
+    </list>
+
+    A response that passes these checks is said to be valid. Validty of a response does not prove the time is correct, but merely
+    that the server signed it, and more specifically began to compute the signature at a time in between (MIDP-RADI, MIDP+RADI).
+    </t>
+  </section>
+</section>
+<section title="The smeared scale">
+  <t>
+    Every day in Roughtime has 86400 seconds. A day without a leap second is a day where all seconds are SI seconds. A day with a
+    positive leap second is one where every second is 86401/86400 SI seconds long. A day with a negative leap second is a
+    day where every second is 86399/86400 SI seconds long.
+  </t>
+</section>
+
+<section title="Cheater detection">
+  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceeding response H, is concantenated with a 64 bit blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented in JSON as TBD</t>
+
+  <t>A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt; MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such that i &lt; j, (r_i, r_j) is an invalid pair.</t>
+
+  <t>Invalidty of a chain is proof that causality has been violated if all servers were reporting correct time. An invalid chain where all individual responses are valid is cryptographic proof of malfeasance of at least one server: if all servers had the
+  correct time in the chain, causality would imply that MIDP_1-RADI_1 &lt; MIDP_2+RADI_2.
+  </t>
+</section>
+<section title="Cloudflare's Roughtime Service Implementation">
+  <t>
+    
+  </t>
+</section>
+
+
+<section anchor="Acknowledgements" title="Acknowledgements">
+  <t>
+    TBD
+  </t>
+</section>
+
+<section anchor="IANA" title="IANA Considerations">
+  <t>This memo includes no request to IANA.</t>
+</section>
+
+<section title = "Security Considerations">
+  <t>
+    
+  </t>
+</section>
+<section title = "Privacy Considerations">
+  <t>
+  TBD
+  </t>
+</section>
+</middle>
+
+<back>
+  <references title="Informative References">
+    &RFC5280;
+    &RFC5905;
+    &RFC7384;
+    &RFC8174;
+    &RFC2119;
+    &RFC0020;
+    
+    <reference anchor="SECNTP" target="http://eprint.iacr.org/2016/1006">
+      <front>
+        <title>The Security of NTP's Datagram Protocol</title>
+        
+        <author initials="A." surname="Malhotra" fullname="A. Malhotra">
+            <organization/>
+        </author>
+        <author initials="M. V." surname="Gundy" fullname="M. V. Gundy">
+          <organization/>
+        </author>
+        <author initials="M." surname="Varia" fullname="M. Varia">
+          <organization/>
+        </author>
+        <author initials="H." surname="Kennedy" fullname="H. Kennedy">
+          <organization/>
+        </author>
+        <author initials="J." surname="Gardner" fullname="J. Gardner">
+          <organization/>
+          </author>
+          <author initials="S." surname="Goldberg" fullname="S. Goldberg">
+            <organization/>
+          </author>
+          <date year="2016"/>
+      </front>
+    </reference>
+    
+    <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
+      <front>
+        <title>Attacking the Network Time Protocol</title>
+        
+        <author initials="A." surname="Malhotra" fullname="A. Malhotra">
+          <organization/>
+        </author>
+        <author initials="I." surname="Cohen" fullname="I. Cohen">
+          <organization/>
+        </author>
+        <author initials="E." surname="Brakke" fullname="E. Brakke">
+          <organization/>
+        </author>
+        <author initials="S." surname="Goldberg" fullname="S. Goldberg">
+          <organization/>
+        </author>
+        
+        <date year="2015"/>
+      </front>
+    </reference>
+    <reference anchor="CLOCKDRIFT" target="http://downloads.hindawi.com/journals/jcnc/2008/583162.pdf">
+      <front>
+        <title>Internal clock drift estimation in computer clusters</title>
+        
+        <author initials="H." surname="Marouani" fullname="H. Marouani">
+          <organization/>
+        </author>
+        <author initials="M. R." surname="Dagenais" fullname="M. R. Dagenais">
+          <organization/>
+        </author>
+        <date year="2008"/>
+      </front>
+    </reference>
+  </references>
+</back>
+</rfc>
