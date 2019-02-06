@@ -221,7 +221,7 @@ RFC7384 SYSTEM
     <section title="DELE">
       <t>
         MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validty.
-        MAXT is the maximum uint64 timestamp at which PUBK may sign. MAXT &lt; MINT for validity.
+        MAXT is the maximum uint64 timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.
         PUBK is a temporary Ed25519 public key.
       </t>
     </section>
@@ -231,15 +231,30 @@ RFC7384 SYSTEM
       hash as one ascends the tree. The final value MUST be equal to ROOT.
 
       PATH is a multiple of 64 bytes long. One starts by computing the hash of the NONC value from the request, with \x00 preappended.
-      Then one walks from the least significant bit of INDX to the most significant bit, and also walks up PATH.
+      Then one walks from the least significant bit of INDX to the most significant bit, and also walks towards the end of PATH.
 
       If PATH ends then the remaining bits of the INDX MUST be all zero. This indicates the termination of the walk.
 
       If the current bit is 0, one hashes \x01, the current hash, and the value from PATH.
       If the current bit is 1 one hashes \x01, the value from PATH, and the current HASH.
-      This enables servers to batch signing when busy
+      This enables servers to batch signing when busy.
       </t>
     </section>
+  </section>
+
+  <section title ="Validity of response">
+    A client MUST check the following properties when it recieves a response. We assume the long term server public key is known
+    to the client through other means.
+
+    <list>
+      <t> The signature in CERT was made with the long-term key of the server</t>
+      <t> The DELE timestamps and the MIDP value are consistent</t>
+      <t> The INDX and PATH values prove NONC was included in the Merkel tree with value ROOT</t>
+      <t> The signature of SREP in SIG\x00 was made with the public key in DELE and is valid</t>
+    </list>
+
+    A response that passes these checks is said to be valid. Validty of a response does not prove the time is correct, but merely
+    that the server signed it, and more specifically began to compute the signature at a time in between (MIDP-RADI, MIDP+RADI).
   </section>
 </section>
 <section title="The smeared scale">
@@ -251,12 +266,12 @@ RFC7384 SYSTEM
 </section>
 
 <section title="Cheater detection">
-  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceeding response is the NONC used in the subsequent response. A chain of responses is serialized by preappending a uint32 little-endian length to each response
-  and concatenating them all.
+  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceeding response H, is concantenated with a 64 bit blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented in JSON as TBD</t>
 
-  A chain of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt; MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such that i &lt; j, (r_i, r_j) is an invalid chain.
+  <t>A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt; MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such that i &lt; j, (r_i, r_j) is an invalid pair.</t>
 
-  Invalidty of a chain is proof that causality has been violated if all servers were reporting correct time. An invalid chain where all individual responses are valid is cryptographic proof of malfeasance of at least one server.
+  <t>Invalidty of a chain is proof that causality has been violated if all servers were reporting correct time. An invalid chain where all individual responses are valid is cryptographic proof of malfeasance of at least one server: if all servers had the
+  correct time in the chain, causality would imply that MIDP_1-RADI_1 &lt; MIDP_2+RADI_2.
   </t>
 </section>
 <section title="Cloudflare's Roughtime Service Implementation">
@@ -278,12 +293,12 @@ RFC7384 SYSTEM
 
 <section title = "Security Considerations">
   <t>
-    TBD      
+    
   </t>
 </section>
 <section title = "Privacy Considerations">
   <t>
-    TBD      
+    Clients participating in the production of chains of responses will generate a nonce deterministically.
   </t>
 </section>
 </middle>
