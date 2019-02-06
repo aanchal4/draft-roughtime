@@ -83,25 +83,26 @@ RFC7384 SYSTEM
         <t> Chronos client relies on a large pool of unauthenticated servers to get time </t>
         <t> MD5-NTP client uses symmetric-key MAC to authenticate the server</t>
         <t> ANTP, NTS use TLS-style authentication for server  </t>
-        <t> Roughtime uses PKI-based digital signatures for server authentication (this is essential to achieve the accountability property achieved by the roughtime server.) </t>
+        <t> Roughtime uses digital signatures for server authentication (this is essential to achieve the accountability property achieved by the roughtime server.) </t>
       </list>
     </t>
     <t>
-      There are several trust relationships involved when a client tries to get time from a server over the internet. First there is the server and second there is the communication network between the client and the server. The content of time packets is not secret. So to trust the network, the client only needs to verify that the content of the received packet is not modified en route (signature from the server assure that). To trust the server and the content of the packet, the client needs to verify two conditions a) the packet comes from the server that the client thinks that it is coming from (signature from the server assure that) and b) the content in the packet is correct. 
+      When a client attempts to synchronize with network time sources at several points malicious entities can influence the time obtained. Authenticating time servers prevents network adversaries from having free reign to change the clocks,
+      but a malicious time server is still able to influence the time a client computes. Roughtime provides cryptographic proof of malfeasance, enabling clients to detect attempts to influence the time even if they only query one honest server.
     </t>
-    <t>
-      And if (b) does not hold, then the client can prove this cryptographically to a third party. Roughtime is the only protocol that provides this last property.
-          </t>
-      <texttable anchor = "existing_approaches">
+       <texttable anchor = "existing_approaches">
         <preamble> TBD </preamble>
         <ttcol align='center'>Protocol</ttcol>
-   <ttcol align='center'>Trusted Network</ttcol>
-   <ttcol align='center'>Trusted Server</ttcol>
-   <ttcol align='center'>Server Malfeasance Evidence</ttcol>
-   <c>NTP, Chronos</c><c>N</c><c>N</c><c>N</c>
-   <c>NTP-MD5, ANTP, NTS</c><c>Y</c><c>Y</c><c>N</c>
-   <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c>
-        <postamble>   TBD </postamble>
+        <ttcol align='center'>Byzantine Security</ttcol>
+        <ttcol align='center'>Authenticated Server</ttcol>
+        <ttcol align='center'>Client cannot impersonate Server</ttcol>
+        <ttcol align='center'>Server Malfeasance Evidence</ttcol>
+        <c>NTP</c>     <c>N</c><c>N</c><c>N</c> <c>N</c>
+        <c>Chronos</c> <c>Y</c><c>N</c><c>N</c><c>N</c>
+        <c>NTP-MD5</c> <c>N</c><c>Y</c><c>N</c><c>N</c>
+        <c>NTS</c>      <c>N</c><c>Y</c><c>Y</c><c>N</c>
+        <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c><c>Y</c>
+        <postamble>   Security Properties of current protocols </postamble>
       </texttable>
     </section>
 <section title = "Requirements Language">
