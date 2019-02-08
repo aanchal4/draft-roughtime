@@ -10,7 +10,9 @@ RFC8174 SYSTEM
 RFC7384 SYSTEM
 "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7384.xml">
 <!ENTITY RFC0020 SYSTEM
-"https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0020.xml">
+"http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0020.xml">
+<!ENTITY RFC8032 SYSTEM
+"http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8032.xml">
 ]>
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -57,7 +59,7 @@ RFC7384 SYSTEM
         </address>
     </author>
 
-    <date year="2019" month="February" day="1"/>
+    <date year="2019" month="February" day="8"/>
 
     <area>General</area>
 
@@ -76,32 +78,29 @@ RFC7384 SYSTEM
 
   <middle>
     <section title="Motivation">
-    
       <t>
-      <list style = "bullet">
-        <t> NTP client relies on few unauthenticated servers to get time</t>
-        <t> Chronos client relies on a large pool of unauthenticated servers to get time </t>
-        <t> MD5-NTP client uses symmetric-key MAC to authenticate the server</t>
-        <t> ANTP, NTS use TLS-style authentication for server  </t>
-        <t> Roughtime uses digital signatures for server authentication (this is essential to achieve the accountability property achieved by the roughtime server.) </t>
-      </list>
-    </t>
-    <t>
-      When a client attempts to synchronize with network time sources at several points malicious entities can influence the time obtained. Authenticating time servers prevents network adversaries from having free reign to change the clocks,
-      but a malicious time server is still able to influence the time a client computes. Roughtime provides cryptographic proof of malfeasance, enabling clients to detect attempts to influence the time even if they only query one honest server.
+        Time synchronization is essential to Internet security as many
+        authentication protocols require synchronization <xref
+        target="RFC7384"/>. Unfortunately widely deployed protocols
+        such as NTP <xref target="RFC5905"/> lack essential security
+        features, and even newer protocols fail to ensure that servers
+        behave correctly.  Authenticating time servers prevents
+        network adversaries from having free reign to change the
+        clocks, but a malicious time server is still able to influence
+        the time a client computes. Roughtime provides cryptographic
+        proof of malfeasance, enabling clients to detect attempts to
+        influence the time even if they only query one honest server.
     </t>
        <texttable anchor = "existing_approaches">
-        <preamble> TBD </preamble>
         <ttcol align='center'>Protocol</ttcol>
         <ttcol align='center'>Byzantine Security</ttcol>
         <ttcol align='center'>Authenticated Server</ttcol>
-        <ttcol align='center'>Client cannot impersonate Server</ttcol>
         <ttcol align='center'>Server Malfeasance Evidence</ttcol>
-        <c>NTP</c>     <c>N</c><c>N</c><c>N</c> <c>N</c>
-        <c>Chronos</c> <c>Y</c><c>N</c><c>N</c><c>N</c>
-        <c>NTP-MD5</c> <c>N</c><c>Y</c><c>N</c><c>N</c>
-        <c>NTS</c>      <c>N</c><c>Y</c><c>Y</c><c>N</c>
-        <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c><c>Y</c>
+        <c>NTP</c>     <c>N</c><c>N</c> <c>N</c>
+        <c>Chronos</c> <c>Y</c><c>N</c><c>N</c>
+        <c>NTP-MD5</c> <c>N</c><c>Y*</c><c>N</c>
+        <c>NTS</c>      <c>N</c><c>Y</c><c>N</c>
+        <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c>
         <postamble>   Security Properties of current protocols </postamble>
       </texttable>
     </section>
@@ -121,52 +120,95 @@ RFC7384 SYSTEM
 <section title = "Protocol Overview">
 
   <t>
-      Roughtime is a protocol for rough time synchronization that enables clients to provide cryptographic proof of server malfeasance. It does so by having responses from servers include a signature with a long term public/private key pair over a portion of the initial request, thus providing cryptographic proof that the timestamp was issued after previous responses and before future ones.
-      </t>
-  <t>
-    Single Server Mode: At its most basic level, Roughtime is a one round protocol in which a completely fresh client requests the current time and the server sends a signed response. The response is comprised of a timestamp (the number of microseconds since the Unix epoch) and a radius (in microseconds) used to indicate the servers certainty about the reported time. For example, a radius of 1,000,000 microsec means the server is absolutely confident that the true time is within one second of the reported time.
+    Roughtime is a protocol for rough time synchronization that
+    enables clients to provide cryptographic proof of server
+    malfeasance. It does so by having responses from servers include
+    a signature with a certificate rooted in long term
+    public/private key pair over a portion of the initial request,
+    thus providing cryptographic proof that the timestamp was issued
+    after previous responses and before future ones.
   </t>
   <t>
-    The server proves freshness of its response as follows. The request contains a random challenge. The server incorporates the challenge into its signed response so that its needed to verify the signature. This proves that the signed response could only have been generated after the challenge was issued if the challenge has sufficent entropy.
+    Single Server Mode: At its most basic level, Roughtime is a one
+    round protocol in which a completely fresh client requests the
+    current time and the server sends a signed response. The response
+    is comprised of a timestamp (the number of microseconds since the
+    Unix epoch) and a radius (in microseconds) used to indicate the
+    servers certainty about the reported time. For example, a radius
+    of 1,000,000 microseconds means the server is absolutely confident
+    that the true time is within one second of the reported time.
   </t>
   <t>
-    The client uses the servers root public key to verify the signature. (The key is obtained out-of-band.) When the server starts, it generates an online public/secret key pair, the root secret key is used to create a delegation for the online public key, and the online secret key is used to sign the response. The delegation serves the same function as a traditional X.509 certificate on the web as illustrated in the figure below, the client first uses the root public key to verify the delegation, then uses the online public key to verify the response. This allows for operational separation of the delegator and the server and limits exposure of the root secret key.
-    It knows that its authentic because it has a signature from the server. But if it doesnt completely trust the server it can ask another server for the time.
+    The server proves freshness of its response as follows: The
+    request contains a random challenge. The server incorporates the
+    challenge into its signed response so that its needed to verify
+    the signature. This proves that the signed response could only
+    have been generated after the challenge was issued if the
+    challenge has sufficient entropy.
   </t>
   <t>
-    Chaining multiple servers: For the second request, the client generates its nonce by hashing the reply from the first server with a random value. This proves that the nonce was created after the reply from the first server. It sends that to the second server and receives a signature from it covering that nonce and the time from the second server. Let us assume that the times from the two servers are significantly different. 
+    Chaining multiple servers: For subsequent requests, the client
+    generates its nonce by hashing the reply from the first server
+    with a random value. This proves that the nonce was created after
+    the reply from the first server. It sends that to the second
+    server and receives a signature from it covering that nonce and
+    the time from the second server.
   </t>
   <t>
-    Cryptographic Proof of misbehavior: If the time from the server second server is before the first, then the client has proof of misbehaviour: the reply from the second server implicitly shows that it was created later because of the way that the client constructed the nonce. If the time from the second server is after, then the client can contact the first server again and get a signature that was provably created afterwards, but with an earlier timestamp.
+    Cryptographic Proof of misbehavior: If the time from the server
+    second server is before the first, then the client has proof of
+    misbehavior: the reply from the second server implicitly shows
+    that it was created later because of the way that the client
+    constructed the nonce. If the time from the second server is
+    after, then the client can contact the first server again and get
+    a signature that was provably created afterwards, but with an
+    earlier timestamp.
   </t>
   <t>
-    With only two servers, the client can end up with proof that something is wrong, but no idea what the correct time is. But with half a dozen or more independent servers, the client will end up with chain of proof of any servers misbehaviour, signed by several others, and (presumably) enough accurate replies to establish what the correct time is.
+    With only two servers, the client can end up with proof that
+    something is wrong, but no idea what the correct time is. But with
+    half a dozen or more independent servers, the client will end up
+    with chain of proof of any servers misbehavior, signed by several
+    others, and (presumably) enough accurate replies to establish what
+    the correct time is. Furthermore this proof may be validated by
+    third parties ultimately leading to a revocation of trust in the
+    misbehaving server.
   </t>
 </section>
 <section title = "Message Format">
   <t>
-  A Roughtime packet is a UDP packet containing a map from uint32s to strings of bytes. The byte strings must all
-  have lengths a multiple of four. All uint32 are encoded with the least significant byte first. The keys of this map are called tags.
+  A Roughtime packet is a UDP packet containing a map from uint32s to
+  strings of bytes. The byte strings must all have lengths a multiple
+  of four. All uint32 are encoded with the least significant byte
+  first. The keys of this map are called tags, and we speak of the value of a tag
+  as the string of bytes it is mapped to.
   </t>
   <t>
-  A Roughtime packet is serialized as follows: First there is a header.
+  A Roughtime packet is serialized as follows: First there is a header,
   The first four bytes in the header are the uint32 number of tags N, and hence of (tag, value) pairs.
   4*(N-1) bytes are offsets, each offset a uint32.
   The last 4*N bytes are the tags.
   </t>
   <t>
-
-  Tags are in ascending order, and no tag can be repeated. Offsets are all a multiple of four and MUST be strictly increasing. The offset array is considered
-  to have a not explictly encoded value of length 0.
+  Tags are in ascending order, and no tag can be repeated. Offsets are
+  all a multiple of four and MUST be strictly increasing. The offset
+  array is considered to have a not explicitly encoded value of 0 as its zeroeth entry.
   </t>
   <t>
-  Immediately following the header is a concatenation of all the bytes. The first post-header byte is at offset 0, and the end of the final byte string is
-  indicated by the end of the packet. The ith byte string  ends at offset[i+1]-1.
+  Immediately following the header is a concatenation of all the
+  bytes. The first post-header byte is at offset 0, and the end of the
+  final byte string is indicated by the end of the packet. The ith
+  byte string ends at offset[i+1]-1, counting of course from 0. It is the
+  value associated to the ith tag.
   </t>
   <t>
-  This encoding may be recursive: a value may be said to be in Roughtime packet format and thus have a header, etc.
-  Tags may be listed as four ASCII characters <xref target="RFC0020"/>. In this case the tag when serialized will be those four ASCII characters. Exempla gratia NONC would be the numeric value 0x434e4f4e.
-  They may also be listed as fewer then four ASCII characters with hex escape codes at the end.
+  This encoding may be recursive: a value may be said to be in
+  Roughtime packet format and thus have a header, etc.  Tags may be
+  listed as four ASCII characters <xref target="RFC0020"/>. In this
+  case the tag when serialized will be those four ASCII
+  characters. Exempli gratia NONC would be the numeric value
+  0x434e4f4e.  They may also be listed as fewer then four ASCII
+  characters with hex escape codes at the end.
   </t>
 </section>
 
@@ -185,31 +227,32 @@ RFC7384 SYSTEM
     <t>
       A response contains the following tags: SREP, SIG\x00, CERT, INDX, PATH,
       SREP value is itself a packet that  contains the folowing tags: ROOT, MIDP, RADI.     
-      SIG\x00 is an Ed25519 signature of the SREP value with the public key contained in CERT as explained later.
+      SIG\x00 is an Ed25519 signature <xref target="RFC8032"/> over the SREP value using the  public key contained in CERT as explained later.
     </t>
     <t>
     
     CERT is a packet containing the following tags: DELE, SIG\x00.
-    This SIG\x00 is an Ed25519 signature of DELE with the long term public key of the server.
+    This SIG\x00 is an Ed25519 signature over DELE using the long term public key of the server.
     DELE is itself a packet containing tags MINT, MAXT, PUBK.
     </t>
     <section title="SREP">
       <t>
-        ROOT contains the root hash value of a Merkele tree using SHA512 as described when we reach the PATH and INDX blocks
+        ROOT contains the root hash value of a Merkle tree using SHA512 as described when we reach the PATH and INDX blocks
         MIDP contains an uint64 value consisting of the number of microseconds since the Unix epoch in the smeared scale.
         RADI contains the server's estimate of the accuracy of MIDP. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.
       </t>
     </section>
     <section title="DELE">
       <t>
-        MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validty.
+        MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validity.
         MAXT is the maximum uint64 timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.
-        PUBK is a temporary Ed25519 public key.
+        PUBK is a temporary Ed25519 public key. The use of this field is to enable seperation of a root public key from keys on
+        devices exposed to the public Internet.
       </t>
     </section>
     <section title="INDX and PATH">
       <t>
-      INDX is a uint32 determining the position of NONC in a Merkel tree. PATH determines the values to be hashed with the running
+      INDX is a uint32 determining the position of NONC in a Merkle tree. PATH determines the values to be hashed with the running
       hash as one ascends the tree. The final value MUST be equal to ROOT.
 
       PATH is a multiple of 64 bytes long. One starts by computing the hash of the NONC value from the request, with \x00 preappended.
@@ -226,17 +269,17 @@ RFC7384 SYSTEM
 
   <section title ="Validity of response">
     <t>
-    A client MUST check the following properties when it recieves a response. We assume the long term server public key is known
+    A client MUST check the following properties when it receives a response. We assume the long term server public key is known
     to the client through other means.
 
     <list>
       <t> The signature in CERT was made with the long-term key of the server</t>
       <t> The DELE timestamps and the MIDP value are consistent</t>
-      <t> The INDX and PATH values prove NONC was included in the Merkel tree with value ROOT</t>
-      <t> The signature of SREP in SIG\x00 was made with the public key in DELE and is valid</t>
+      <t> The INDX and PATH values prove NONC was included in the Merkle tree with value ROOT</t>
+      <t> The signature of SREP in SIG\x00 validates with the public key in DELE</t>
     </list>
 
-    A response that passes these checks is said to be valid. Validty of a response does not prove the time is correct, but merely
+    A response that passes these checks is said to be valid. Validity of a response does not prove the time is correct, but merely
     that the server signed it, and more specifically began to compute the signature at a time in between (MIDP-RADI, MIDP+RADI).
     </t>
   </section>
@@ -245,22 +288,33 @@ RFC7384 SYSTEM
   <t>
     Every day in Roughtime has 86400 seconds. A day without a leap second is a day where all seconds are SI seconds. A day with a
     positive leap second is one where every second is 86401/86400 SI seconds long. A day with a negative leap second is a
-    day where every second is 86399/86400 SI seconds long.
+    day where every second is 86399/86400 SI seconds long. Days begin and end at noon, and the leap second is applied at midnight.
+  </t>
+  <t>
+    Arithemtic on the smeared scale requires knowing when the seconds changed length and thus requires a leap second table.
   </t>
 </section>
 
 <section title="Cheater detection">
-  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceeding response H, is concantenated with a 64 bit blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented in JSON as TBD</t>
+  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceding response H, is concatenated with a 64 bit blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented in JSON as TBD</t>
 
   <t>A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt; MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such that i &lt; j, (r_i, r_j) is an invalid pair.</t>
 
-  <t>Invalidty of a chain is proof that causality has been violated if all servers were reporting correct time. An invalid chain where all individual responses are valid is cryptographic proof of malfeasance of at least one server: if all servers had the
+  <t>Invalidity of a chain is proof that causality has been violated if all servers were reporting correct time. An invalid chain where all individual responses are valid is cryptographic proof of malfeasance of at least one server: if all servers had the
   correct time in the chain, causality would imply that MIDP_1-RADI_1 &lt; MIDP_2+RADI_2.
   </t>
 </section>
-<section title="Cloudflare's Roughtime Service Implementation">
+<section title="Grease">
+  <t> Servers MAY send back a fraction of responses that are syntactically invalid or contain invalid signatures as well as incorrect times. Clients MUST properly reject such responses.
+  </t>
+</section>
+<section title="Roughtime Servers">
   <t>
-    
+  <list>
+    <t> roughtime.int08h.com; 016e6e0284d24c37c6e4d7d8d5b4e1d3c1949ceaa545bf875616c9dce0</t>
+    <t> roughtime.cloudflare.com:2002; gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=</t>
+    <t> roughtime.sandbox.google.com:2002; etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=</t>
+  </list>
   </t>
 </section>
 
@@ -277,12 +331,31 @@ RFC7384 SYSTEM
 
 <section title = "Security Considerations">
   <t>
-    
+    This protocol will not survive the advent of quantum
+    computers. Currently only one signature scheme is
+    supported. Maintaining a list of trusted servers and adjudicating
+    violations of the rules by servers are not discussed in this
+    document and are essential for security. Arithmetic on the
+    adjusted timescale is interesting with intervals, and this may
+    impact the interpretation of the MAXT and MINT fields. Servers
+    carry out a significant amount of computation in response to
+    clients, and thus may experience vulnerability to denial of
+    service attacks.
+  </t>
+  <t>
+    This protocol does not provide any confidentiality, and given the
+    nature of timestamps such impact is minor. The compromise of a
+    PUBK's private key, even past MAXT, is a problem as the private
+    key can be used to sign invalid times that are in the range MINT
+    to MAXT, and thus violate the good behavior guarantee of the
+    server.
   </t>
 </section>
 <section title = "Privacy Considerations">
   <t>
-  TBD
+    This protocol is designed to obscure all client
+    identifiers. Servers necessarily have persistent long term
+    identities essential to enforcing correct behavior. Multiple servers 
   </t>
 </section>
 </middle>
@@ -295,6 +368,7 @@ RFC7384 SYSTEM
     &RFC8174;
     &RFC2119;
     &RFC0020;
+    &RFC8032;
     
     <reference anchor="SECNTP" target="http://eprint.iacr.org/2016/1006">
       <front>
