@@ -132,7 +132,7 @@ RFC7384 SYSTEM
     Single Server Mode: At its most basic level, Roughtime is a one
     round protocol in which a completely fresh client requests the
     current time and the server sends a signed response. The response
-    is comprised of a timestamp (the number of microseconds since the
+    inculdes a timestamp (the number of microseconds since the
     Unix epoch) and a radius (in microseconds) used to indicate the
     servers certainty about the reported time. For example, a radius
     of 1,000,000 microseconds means the server is absolutely confident
@@ -177,33 +177,35 @@ RFC7384 SYSTEM
 </section>
 <section title = "Message Format">
   <t>
-  A Roughtime packet is a UDP packet containing a map from uint32s to
-  strings of bytes. The byte strings must all have lengths a multiple
-  of four. All uint32 are encoded with the least significant byte
-  first. The keys of this map are called tags, and we speak of the value of a tag
-  as the string of bytes it is mapped to.
+    A Roughtime packet is a UDP packet whose contents are interpreted
+    as a map from uint32s to strings of bytes. The byte strings must
+    all have lengths a multiple of four. All uint32 are encoded with
+    the least significant byte first. The keys of this map are called
+    tags, and we speak of the value of a tag as the string of bytes it
+    is mapped to.
   </t>
   <t>
-  A Roughtime packet is serialized as follows: First there is a header,
-  The first four bytes in the header are the uint32 number of tags N, and hence of (tag, value) pairs.
-  4*(N-1) bytes are offsets, each offset a uint32.
-  The last 4*N bytes are the tags.
+  A Roughtime packet is serialized as follows: First there is a
+  header, The first four bytes in the header are the uint32 number of
+  tags N, and hence of (tag, value) pairs.  4*(N-1) bytes are offsets,
+  each offset a uint32.  The last 4*N bytes are the tags.
   </t>
   <t>
   Tags are in ascending order, and no tag can be repeated. Offsets are
   all a multiple of four and MUST be strictly increasing. The offset
-  array is considered to have a not explicitly encoded value of 0 as its zeroeth entry.
+  array is considered to have a not explicitly encoded value of 0 as
+  its zeroeth entry.
   </t>
   <t>
   Immediately following the header is a concatenation of all the
-  bytes. The first post-header byte is at offset 0, and the end of the
-  final byte string is indicated by the end of the packet. The ith
-  byte string ends at offset[i+1]-1, counting of course from 0. It is the
-  value associated to the ith tag.
+  strings. The first post-header byte is at offset 0, and the end of
+  the final byte string is indicated by the end of the packet. The ith
+  byte string ends at offset[i+1]-1, counting of course from 0, and
+  begins at offset[i]. It is the value associated to the ith tag.
   </t>
   <t>
   This encoding may be recursive: a value may be said to be in
-  Roughtime packet format and thus have a header, etc.  Tags may be
+  Roughtime format and thus have a header, etc.  Tags may be
   listed as four ASCII characters <xref target="RFC0020"/>. In this
   case the tag when serialized will be those four ASCII
   characters. Exempli gratia NONC would be the numeric value
@@ -226,14 +228,14 @@ RFC7384 SYSTEM
   <section title="Responses">
     <t>
       A response contains the following tags: SREP, SIG\x00, CERT, INDX, PATH,
-      SREP value is itself a packet that  contains the folowing tags: ROOT, MIDP, RADI.     
+      SREP value is itself in Roughtime format that  contains the folowing tags: ROOT, MIDP, RADI.     
       SIG\x00 is an Ed25519 signature <xref target="RFC8032"/> over the SREP value using the  public key contained in CERT as explained later.
     </t>
     <t>
     
-    CERT is a packet containing the following tags: DELE, SIG\x00.
+    CERT in Roughtime format and contains the following tags: DELE, SIG\x00.
     This SIG\x00 is an Ed25519 signature over DELE using the long term public key of the server.
-    DELE is itself a packet containing tags MINT, MAXT, PUBK.
+    DELE is itself in Roughtime format containing tags MINT, MAXT, PUBK.
     </t>
     <section title="SREP">
       <t>
@@ -310,8 +312,9 @@ RFC7384 SYSTEM
 </section>
 <section title="Roughtime Servers">
   <t>
+    The below list contains a list of servers with their public keys in either Base64 or hexidecimal format.
   <list>
-    <t> roughtime.int08h.com; 016e6e0284d24c37c6e4d7d8d5b4e1d3c1949ceaa545bf875616c9dce0</t>
+    <t> roughtime.int08h.com:2002; 016e6e0284d24c37c6e4d7d8d5b4e1d3c1949ceaa545bf875616c9dce0</t>
     <t> roughtime.cloudflare.com:2002; gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=</t>
     <t> roughtime.sandbox.google.com:2002; etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=</t>
   </list>
