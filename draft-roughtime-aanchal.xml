@@ -78,18 +78,17 @@ RFC7384 SYSTEM
 
   <middle>
     <section title="Motivation">
-      <t>
-        Time synchronization is essential to Internet security as many
-        authentication protocols require synchronization <xref
+      <tTime synchronization is essential to Internet security as many
+        security protocols and other applications require synchronization <xref
         target="RFC7384"/>. Unfortunately widely deployed protocols
-        such as NTP <xref target="RFC5905"/> lack essential security
-        features, and even newer protocols fail to ensure that servers
+        such as the Network Time Protocol (NTP) <xref target="RFC5905"/> lack essential security
+        features, and even newer protocols like Network Time Security (NTS) fail to ensure that the servers
         behave correctly.  Authenticating time servers prevents
         network adversaries from having free reign to change the
         clocks, but a malicious time server is still able to influence
-        the time a client computes. Roughtime provides cryptographic
+        the time a client computes. Roughtime protocol provides cryptographic
         proof of malfeasance, enabling clients to detect attempts to
-        influence the time even if they only query one honest server.
+        influence the time even if they only query one time server.
     </t>
        <texttable anchor = "existing_approaches">
         <ttcol align='center'>Protocol</ttcol>
