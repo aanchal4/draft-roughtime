@@ -355,7 +355,7 @@ RFC7384 SYSTEM
   <t>
     This protocol is designed to obscure all client
     identifiers. Servers necessarily have persistent long term
-    identities essential to enforcing correct behavior. Multiple servers 
+    identities essential to enforcing correct behavior.
   </t>
 </section>
 </middle>
