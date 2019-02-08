@@ -13,6 +13,8 @@ RFC7384 SYSTEM
 "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0020.xml">
 <!ENTITY RFC8032 SYSTEM
 "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8032.xml">
+<!ENTITY NTS SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-ntp-using-nts-for-ntp.xml">
+<!ENTITY NTP SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-ntp-mac.xml">
 ]>
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -78,12 +80,13 @@ RFC7384 SYSTEM
 
   <middle>
     <section title="Motivation">
-      <tTime synchronization is essential to Internet security as many
+      <t>
+        Time synchronization is essential to Internet security as many
         security protocols and other applications require synchronization <xref
-        target="RFC7384"/>. Unfortunately widely deployed protocols
+        target="RFC7384"/><xref target="MCBG"/>. Unfortunately widely deployed protocols
         such as the Network Time Protocol (NTP) <xref target="RFC5905"/> lack essential security
-        features, and even newer protocols like Network Time Security (NTS) fail to ensure that the servers
-        behave correctly.  Authenticating time servers prevents
+        features, and even newer protocols like Network Time Security (NTS) <xref target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that the servers
+        behave correctly. Authenticating time servers prevents
         network adversaries from having free reign to change the
         clocks, but a malicious time server is still able to influence
         the time a client computes. Roughtime protocol provides cryptographic
@@ -95,25 +98,24 @@ RFC7384 SYSTEM
         <ttcol align='center'>Byzantine Security</ttcol>
         <ttcol align='center'>Authenticated Server</ttcol>
         <ttcol align='center'>Server Malfeasance Evidence</ttcol>
-        <c>NTP</c>     <c>N</c><c>N</c> <c>N</c>
+        <c>NTP</c>     <c>Y</c><c>N</c> <c>N</c>
         <c>Chronos</c> <c>Y</c><c>N</c><c>N</c>
-        <c>NTP-MD5</c> <c>N</c><c>Y*</c><c>N</c>
-        <c>NTS</c>      <c>N</c><c>Y</c><c>N</c>
+        <c>NTP-MD5</c> <c>Y</c><c>Y*</c><c>N</c>
+        <c>NTS</c>      <c>Y</c><c>Y</c><c>N</c>
         <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c>
         <postamble>   Security Properties of current protocols </postamble>
       </texttable>
+      <t>
+      Y* For security issues with NTP-MD5, please refer to <xref target="I-D.ietf-ntp-mac">Message Authentication Code for the Network Time Protocol draft</xref>
+    </t>
     </section>
+    
 <section title = "Requirements Language">
   <t>
     The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
       NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
       "MAY", and "OPTIONAL" in this document are to be interpreted as
       described in BCP 14 <xref target="RFC2119"></xref> <xref target="RFC8174"></xref> when, and only when, they appear in all capitals, as shown here.
-  </t>
-</section>
-<section title = "Terminology">
-  <t>
-    TBD
   </t>
 </section>
 <section title = "Protocol Overview">
@@ -287,9 +289,7 @@ RFC7384 SYSTEM
 </section>
 <section title="The smeared scale">
   <t>
-    Every day in Roughtime has 86400 seconds. A day without a leap second is a day where all seconds are SI seconds. A day with a
-    positive leap second is one where every second is 86401/86400 SI seconds long. A day with a negative leap second is a
-    day where every second is 86399/86400 SI seconds long. Days begin and end at noon, and the leap second is applied at midnight.
+    Every day in Roughtime has 86400 seconds. A day without a leap second is a day where all seconds are SI seconds. A day with a positive leap second is one where every second is 86401/86400 SI seconds long. A day with a negative leap second is a day where every second is 86399/86400 SI seconds long. Days begin and end at noon, and when a leap-second is added or removed from UTC it is smeared out over the course of a day.
   </t>
   <t>
     Arithemtic on the smeared scale requires knowing when the seconds changed length and thus requires a leap second table.
@@ -371,32 +371,8 @@ RFC7384 SYSTEM
     &RFC2119;
     &RFC0020;
     &RFC8032;
-    
-    <reference anchor="SECNTP" target="http://eprint.iacr.org/2016/1006">
-      <front>
-        <title>The Security of NTP's Datagram Protocol</title>
-        
-        <author initials="A." surname="Malhotra" fullname="A. Malhotra">
-            <organization/>
-        </author>
-        <author initials="M. V." surname="Gundy" fullname="M. V. Gundy">
-          <organization/>
-        </author>
-        <author initials="M." surname="Varia" fullname="M. Varia">
-          <organization/>
-        </author>
-        <author initials="H." surname="Kennedy" fullname="H. Kennedy">
-          <organization/>
-        </author>
-        <author initials="J." surname="Gardner" fullname="J. Gardner">
-          <organization/>
-          </author>
-          <author initials="S." surname="Goldberg" fullname="S. Goldberg">
-            <organization/>
-          </author>
-          <date year="2016"/>
-      </front>
-    </reference>
+    &NTS;
+    &NTP;
     
     <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
       <front>
@@ -418,19 +394,7 @@ RFC7384 SYSTEM
         <date year="2015"/>
       </front>
     </reference>
-    <reference anchor="CLOCKDRIFT" target="http://downloads.hindawi.com/journals/jcnc/2008/583162.pdf">
-      <front>
-        <title>Internal clock drift estimation in computer clusters</title>
-        
-        <author initials="H." surname="Marouani" fullname="H. Marouani">
-          <organization/>
-        </author>
-        <author initials="M. R." surname="Dagenais" fullname="M. R. Dagenais">
-          <organization/>
-        </author>
-        <date year="2008"/>
-      </front>
-    </reference>
+    
   </references>
 </back>
 </rfc>
