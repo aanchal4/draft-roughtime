@@ -95,14 +95,12 @@ RFC7384 SYSTEM
     </t>
        <texttable anchor = "existing_approaches">
         <ttcol align='center'>Protocol</ttcol>
-        <ttcol align='center'>Byzantine Security</ttcol>
         <ttcol align='center'>Authenticated Server</ttcol>
         <ttcol align='center'>Server Malfeasance Evidence</ttcol>
-        <c>NTP</c>     <c>Y</c><c>N</c> <c>N</c>
-        <c>Chronos</c> <c>Y</c><c>N</c><c>N</c>
-        <c>NTP-MD5</c> <c>Y</c><c>Y*</c><c>N</c>
-        <c>NTS</c>      <c>Y</c><c>Y</c><c>N</c>
-        <c>Roughtime</c><c>Y</c><c>Y</c><c>Y</c>
+        <c>NTP, Chronos</c>     <c>N</c> <c>N</c>
+        <c>NTP-MD5</c> <c>Y*</c><c>N</c>
+        <c>NTS</c>      <c>Y</c><c>N</c>
+        <c>Roughtime</c><c>Y</c><c>Y</c>
         <postamble>   Security Properties of current protocols </postamble>
       </texttable>
       <t>
@@ -357,7 +355,7 @@ RFC7384 SYSTEM
   <t>
     This protocol is designed to obscure all client
     identifiers. Servers necessarily have persistent long term
-    identities essential to enforcing correct behavior. Multiple servers 
+    identities essential to enforcing correct behavior.
   </t>
 </section>
 </middle>
