@@ -87,11 +87,9 @@ RFC7384 SYSTEM
         such as the Network Time Protocol (NTP) <xref target="RFC5905"/> lack essential security
         features, and even newer protocols like Network Time Security (NTS) <xref target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that the servers
         behave correctly. Authenticating time servers prevents
-        network adversaries from having free reign to change the
-        clocks, but a malicious time server is still able to influence
-        the time a client computes. Roughtime protocol provides cryptographic
-        proof of malfeasance, enabling clients to detect attempts to
-        influence the time even if they only query one time server.
+        network adversaries from modifying time packets. An authenticated time server still has full control over the contents of time packet and may go rogue. Roughtime protocol provides cryptographic
+        proof of malfeasance, enabling clients to detect and prove to a third party server's attempts to
+        influence the time a client computes.
     </t>
        <texttable anchor = "existing_approaches">
         <ttcol align='center'>Protocol</ttcol>
@@ -132,7 +130,7 @@ RFC7384 SYSTEM
     after previous responses and before future ones.
   </t>
   <t>
-    Single Server Mode: At its most basic level, Roughtime is a one
+    Single server mode: At its most basic level, Roughtime is a one
     round protocol in which a completely fresh client requests the
     current time and the server sends a signed response. The response
     inculdes a timestamp (the number of microseconds since the
@@ -158,9 +156,9 @@ RFC7384 SYSTEM
     the time from the second server.
   </t>
   <t>
-    Cryptographic Proof of misbehavior: If the time from the server
+    Cryptographic proof of misbehavior: If the time from the
     second server is before the first, then the client has proof of
-    misbehavior: the reply from the second server implicitly shows
+    misbehavior; the reply from the second server implicitly shows
     that it was created later because of the way that the client
     constructed the nonce. If the time from the second server is
     after, then the client can contact the first server again and get
