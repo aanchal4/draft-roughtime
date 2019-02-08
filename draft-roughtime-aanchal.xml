@@ -99,12 +99,16 @@ RFC7384 SYSTEM
         <ttcol align='center'>Server Malfeasance Evidence</ttcol>
         <c>NTP, Chronos</c>     <c>N</c> <c>N</c>
         <c>NTP-MD5</c> <c>Y*</c><c>N</c>
+        <c>NTP-Autokey</c><c>Y**</c><c>N</c>
         <c>NTS</c>      <c>Y</c><c>N</c>
         <c>Roughtime</c><c>Y</c><c>Y</c>
         <postamble>   Security Properties of current protocols </postamble>
       </texttable>
       <t>
-      Y* For security issues with NTP-MD5, please refer to <xref target="I-D.ietf-ntp-mac">Message Authentication Code for the Network Time Protocol draft</xref>
+      Y* For security issues with symmetric-key based NTP-MD5 authentication, please refer to <xref target="I-D.ietf-ntp-mac">Message Authentication Code for the Network Time Protocol draft</xref>
+    </t>
+    <t>
+      Y** For security issues with Autokey Public Key Authentication, refer to <xref target="Autokey"/> 
     </t>
     </section>
     
@@ -392,7 +396,18 @@ RFC7384 SYSTEM
         <date year="2015"/>
       </front>
     </reference>
-    
+    <reference anchor="Autokey" target="https://zero-entropy.de/autokey_analysis.pdf">
+      <front>
+        <title>Analysis of the NTP Autokey Procedures</title>
+        
+        <author initials="S." surname="Rottger">
+          <organization/>
+        </author>
+        
+        <date year="2012"/>
+      </front>
+    </reference>
+
   </references>
 </back>
 </rfc>
