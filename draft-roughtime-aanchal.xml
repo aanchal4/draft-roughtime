@@ -353,6 +353,11 @@ RFC7384 SYSTEM
     to MAXT, and thus violate the good behavior guarantee of the
     server.
   </t>
+  <t>
+    Packets sent by the client MUST be at least 1024 bytes in length in order to
+    mitigate amplification attacks, and servers MUST ignore request packets that
+    are smaller than this length.
+  </t>
 </section>
 <section title = "Privacy Considerations">
   <t>
