@@ -133,9 +133,9 @@ RFC7384 SYSTEM
     Single server mode: At its most basic level, Roughtime is a one
     round protocol in which a completely fresh client requests the
     current time and the server sends a signed response. The response
-    inculdes a timestamp (the number of microseconds since the
+    includes a timestamp (the number of microseconds since the
     Unix epoch) and a radius (in microseconds) used to indicate the
-    servers certainty about the reported time. For example, a radius
+    server's certainty about the reported time. For example, a radius
     of 1,000,000 microseconds means the server is absolutely confident
     that the true time is within one second of the reported time.
   </t>
@@ -169,7 +169,7 @@ RFC7384 SYSTEM
     With only two servers, the client can end up with proof that
     something is wrong, but no idea what the correct time is. But with
     half a dozen or more independent servers, the client will end up
-    with chain of proof of any servers misbehavior, signed by several
+    with chain of proof of any server's misbehavior, signed by several
     others, and (presumably) enough accurate replies to establish what
     the correct time is. Furthermore this proof may be validated by
     third parties ultimately leading to a revocation of trust in the
@@ -209,7 +209,7 @@ RFC7384 SYSTEM
   Roughtime format and thus have a header, etc.  Tags may be
   listed as four ASCII characters <xref target="RFC0020"/>. In this
   case the tag when serialized will be those four ASCII
-  characters. Exempli gratia NONC would be the numeric value
+  characters. For example NONC would be the numeric value
   0x434e4f4e.  They may also be listed as fewer then four ASCII
   characters with hex escape codes at the end.
   </t>
@@ -311,9 +311,10 @@ RFC7384 SYSTEM
 </section>
 <section title="Roughtime Servers">
   <t>
-    The below list contains a list of servers with their public keys in either Base64 or hexidecimal format.
+    The below list contains a list of servers with their public keys in either
+    Base64 or hexadecimal format.
   <list>
-    <t> roughtime.int08h.com:2002; 016e6e0284d24c37c6e4d7d8d5b4e1d3c1949ceaa545bf875616c9dce0</t>
+    <t> roughtime.int08h.com:2002; AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=</t>
     <t> roughtime.cloudflare.com:2002; gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=</t>
     <t> roughtime.sandbox.google.com:2002; etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=</t>
   </list>
