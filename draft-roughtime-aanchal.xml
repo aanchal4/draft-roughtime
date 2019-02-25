@@ -26,7 +26,7 @@ RFC7384 SYSTEM
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-roughtime-aanchal-00" ipr="trust200902">
+<rfc category="info" docName="draft-roughtime-aanchal-01" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -61,7 +61,7 @@ RFC7384 SYSTEM
         </address>
     </author>
 
-    <date year="2019" month="February" day="8"/>
+    <date year="2019" month="March" day="1"/>
 
     <area>General</area>
 
@@ -82,13 +82,19 @@ RFC7384 SYSTEM
     <section title="Motivation">
       <t>
         Time synchronization is essential to Internet security as many
-        security protocols and other applications require synchronization <xref
-        target="RFC7384"/><xref target="MCBG"/>. Unfortunately widely deployed protocols
-        such as the Network Time Protocol (NTP) <xref target="RFC5905"/> lack essential security
-        features, and even newer protocols like Network Time Security (NTS) <xref target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that the servers
-        behave correctly. Authenticating time servers prevents
-        network adversaries from modifying time packets. An authenticated time server still has full control over the contents of time packet and may go rogue. Roughtime protocol provides cryptographic
-        proof of malfeasance, enabling clients to detect and prove to a third party server's attempts to
+        security protocols and other applications require
+        synchronization <xref target="RFC7384"/><xref
+        target="MCBG"/>. Unfortunately widely deployed protocols such
+        as the Network Time Protocol (NTP) <xref target="RFC5905"/>
+        lack essential security features, and even newer protocols
+        like Network Time Security (NTS) <xref
+        target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that
+        the servers behave correctly. Authenticating time servers
+        prevents network adversaries from modifying time packets, but
+        an authenticated time server still has full control over the
+        contents of time packet and may go rogue. The Roughtime protocol
+        provides cryptographic proof of malfeasance, enabling clients
+        to detect and prove to a third party server's attempts to
         influence the time a client computes.
     </t>
        <texttable anchor = "existing_approaches">
@@ -177,6 +183,10 @@ RFC7384 SYSTEM
   </t>
 </section>
 <section title = "Message Format">
+  <t> A uint32 is a 32 bit unsigned integer. It is serialized in bytes with
+  the least significant byte first. A uint64 is a 64 bit unsigned integer. It
+  is also seralized with the least significant byte first.
+  </t>
   <t>
     A Roughtime packet is a UDP packet whose contents are interpreted
     as a map from uint32s to strings of bytes. The byte strings must
@@ -221,7 +231,7 @@ RFC7384 SYSTEM
       A query is a Roughtime packet with the tag NONC. The contents of
       NONC are 64 bytes. The request packet MUST be a minimum of 1024
       bytes. To attain this size the tag PAD\xff MAY be added at the
-      end of the packet with a conent of all zeros. Other tags MUST be
+      end of the packet with a conent of all zeros.  Other tags MUST be
       ignored by the server. Future versions may specify additional
       tags and their semantics, so clients MUST NOT add other tags.
     </t>
@@ -235,38 +245,43 @@ RFC7384 SYSTEM
     <t>
     
     CERT in Roughtime format and contains the following tags: DELE, SIG\x00.
-    This SIG\x00 is an Ed25519 signature over DELE using the long term public key of the server.
+    This SIG\x00 is an Ed25519 signature over DELE that can be verified using the long term public key of the server.
     DELE is itself in Roughtime format containing tags MINT, MAXT, PUBK.
     </t>
     <section title="SREP">
       <t>
-        ROOT contains the root hash value of a Merkle tree using SHA512 as described when we reach the PATH and INDX blocks
-        MIDP contains an uint64 value consisting of the number of microseconds since the Unix epoch in the smeared scale.
-        RADI contains the server's estimate of the accuracy of MIDP. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.
+        <list>
+          <t>ROOT contains the root hash value of a Merkle tree using SHA512 as described when we reach the PATH and INDX blocks</t>
+          <t>MIDP contains an uint64 value consisting of the number of microseconds since the Unix epoch.</t>
+          <t>RADI contains the server's estimate of the accuracy of MIDP. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.</t>
+          <t>LEAP contains the TAI-UTC offset at MIDP as a signed 32 bit integer in two's complement. In cases of ambiguity due to leap seconds either acceptable offset result is acceptable.</t>
+        </list>
       </t>
     </section>
     <section title="DELE">
       <t>
-        MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validity.
-        MAXT is the maximum uint64 timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.
-        PUBK is a temporary Ed25519 public key. The use of this field is to enable seperation of a root public key from keys on
-        devices exposed to the public Internet.
+        <list>
+          <t>MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validity.</t>
+          <t>MAXT is the maximum uint64 timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.</t>
+          <t>PUBK is a temporary Ed25519 public key. The use of this field is to enable seperation of a root public key from keys on
+          devices exposed to the public Internet.</t>
+        </list>
       </t>
     </section>
     <section title="INDX and PATH">
       <t>
-      INDX is a uint32 determining the position of NONC in a Merkle tree. PATH determines the values to be hashed with the running
-      hash as one ascends the tree. The final value MUST be equal to ROOT.
-
-      PATH is a multiple of 64 bytes long. One starts by computing the hash of the NONC value from the request, with \x00 preappended.
-      Then one walks from the least significant bit of INDX to the most significant bit, and also walks towards the end of PATH.
-
-      If PATH ends then the remaining bits of the INDX MUST be all zero. This indicates the termination of the walk.
-
-      If the current bit is 0, one hashes \x01, the current hash, and the value from PATH.
-      If the current bit is 1 one hashes \x01, the value from PATH, and the current HASH.
-      This enables servers to batch signing when busy.
+      INDX is a uint32 determining the position of NONC in a Merkle tree. PATH contains the values to be hashed with the running
+      hash as one ascends the tree. PATH is a multiple of 64 bytes long.
+      The following algorithm verifies inclusion in the Merkle tree:
       </t>
+      <t>
+      One starts by computing the hash of the NONC value from the request, with \x00 preappended.
+      Then one walks from the least significant bit of INDX to the most significant bit, and also walks towards the end of PATH.</t>
+
+      <t>If PATH ends then the remaining bits of the INDX MUST be all zero. This indicates the termination of the walk, and the current value
+      MUST equal ROOT if the response is valid.</t>
+      <t>If the current bit is 0, one hashes \x01, the current hash, and the value from PATH.</t>
+      <t>If the current bit is 1 one hashes \x01, the value from PATH, and the current hash.</t>
     </section>
   </section>
 
@@ -287,17 +302,16 @@ RFC7384 SYSTEM
     </t>
   </section>
 </section>
-<section title="The smeared scale">
+<section title="Time">
   <t>
-    Every day in Roughtime has 86400 seconds. A day without a leap second is a day where all seconds are SI seconds. A day with a positive leap second is one where every second is 86401/86400 SI seconds long. A day with a negative leap second is a day where every second is 86399/86400 SI seconds long. Days begin and end at noon, and when a leap-second is added or removed from UTC it is smeared out over the course of a day.
-  </t>
-  <t>
-    Arithemtic on the smeared scale requires knowing when the seconds changed length and thus requires a leap second table.
+    All times in Roughtime are the number of seconds since the Unix epoch. The Unix epoch is midnight, 1 January, 1970. This is a constant offset from TAI.<xref target="TAI"/>
+    Servers SHOULD use GPS or other realizations of TAI that have been highly accurate in the past for Roughtime to meet their accuracy promises.
   </t>
 </section>
 
 <section title="Cheater detection">
-  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceding response H, is concatenated with a 64 bit blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented in JSON as TBD</t>
+  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceding response H, is concatenated with a 64 byte blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented as an array of objects
+  in JSON where each object may have keys "blind" and "packet". Packet has the base64 encoded bytes of the packet and blind is the blind used for the next nonce. The last packet needs no blind.</t>
 
   <t>A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt; MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such that i &lt; j, (r_i, r_j) is an invalid pair.</t>
 
@@ -306,13 +320,13 @@ RFC7384 SYSTEM
   </t>
 </section>
 <section title="Grease">
-  <t> Servers MAY send back a fraction of responses that are syntactically invalid or contain invalid signatures as well as incorrect times. Clients MUST properly reject such responses.
+  <t> Servers MAY send back a fraction of responses that are syntactically invalid or contain invalid signatures as well as incorrect times. Clients MUST properly reject such responses. Servers MUST NOT send back responses with incorrect times and valid signatures.
+  Either signature MAY be invalid for this application.
   </t>
 </section>
 <section title="Roughtime Servers">
   <t>
-    The below list contains a list of servers with their public keys in either
-    Base64 or hexadecimal format.
+    The below list contains a list of servers with their public keys in Base64 format.
   <list>
     <t> roughtime.int08h.com:2002; AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=</t>
     <t> roughtime.cloudflare.com:2002; gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=</t>
@@ -320,16 +334,33 @@ RFC7384 SYSTEM
   </list>
   </t>
 </section>
-
+<section title="Trust anchors and policies">
+  <t>
+  A trust anchor is any distributor of a list of trusted servers. It is RECOMMENDED that trust
+  anchors subscribe to TBD where evidence of malfeasance may be shared and discussed. Trust anchors
+  SHOULD subscribe to a zero-tolerance policy: any generation of incorrect timestamps will result in
+  removal. To enable this trust anchors SHOULD list a wide variety of servers so the removal of
+  a server does not result in operational issues for clients. Clients SHOULD attempt to detect
+  malfeasance and have a way to report it to trust anchors.
+  </t>
+  <t> Trust anchors SHOULD include any roughtime server with an uptime greater then 99.9% over the past
+  6 months and with no malfeasance. They SHOULD also aggressively collect evidence of such malfeasance.
+  </t>
+  <t> Because only a single roughtime server is required for successful synchronization, Roughtime
+  does not have the incentive problems that have prevented effective enforcement of discipline on the
+  web PKI. We expect that some clients will aggressively monitor server behavior.
+  </t>
+</section>
 
 <section anchor="Acknowledgements" title="Acknowledgements">
   <t>
-    TBD
+    Thomas Peterson corrected multiple nits. Marcus Dansarie, Tal Mizrahi, and the other members of the NTP
+    working group contributed comments and suggestions.
   </t>
 </section>
 
 <section anchor="IANA" title="IANA Considerations">
-  <t>This memo includes no request to IANA.</t>
+  <t>We request IANA assign a UDP port and create a new registry for Roughtime tags.</t>
 </section>
 
 <section title = "Security Considerations">
@@ -353,6 +384,9 @@ RFC7384 SYSTEM
     to MAXT, and thus violate the good behavior guarantee of the
     server.
   </t>
+  <t> Roughtime clients MUST update their view of which servers are trustworthy
+  in order to benefit from the detection of misbehavior.
+  </t>
   <t>
     Packets sent by the client MUST be at least 1024 bytes in length in order to
     mitigate amplification attacks, and servers MUST ignore request packets that
@@ -369,14 +403,16 @@ RFC7384 SYSTEM
 </middle>
 
 <back>
+  <references title="Normative References">
+    &RFC0020;
+    &RFC8032;    
+  </references>
   <references title="Informative References">
     &RFC5280;
     &RFC5905;
     &RFC7384;
     &RFC8174;
     &RFC2119;
-    &RFC0020;
-    &RFC8032;
     &NTS;
     &NTP;
     
@@ -411,6 +447,15 @@ RFC7384 SYSTEM
         <date year="2012"/>
       </front>
     </reference>
+    <reference anchor="TAI" target="https://www.bipm.org/en/bipm-services/timescales/tai.html">
+      <front>
+        <title>International Atomic Time (TAI)</title>
+        <author>
+          <organization>Bureau International des Poids et Mesures</organization>
+        </author>
+      </front>
+    </reference>
+          
 
   </references>
 </back>
