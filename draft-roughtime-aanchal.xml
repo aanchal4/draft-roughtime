@@ -182,10 +182,19 @@ RFC7384 SYSTEM
     misbehaving server.
   </t>
 </section>
+<section title="The guarrentee">
+  <t>
+  A Roughtime response to a query sent at t_1, received at t_2, and with timestamp t_3 is guaranteed to have been created
+  between the transmission of the query and its reception. If t_3 is not within that interval, a server inconsistency may be detected
+  and used to impeach the server. The use of such a guarantee in synchronization is currently beyond the grasp of this document.
+  </t>
+</section>
+  
 <section title = "Message Format">
   <t> A uint32 is a 32 bit unsigned integer. It is serialized in bytes with
   the least significant byte first. A uint64 is a 64 bit unsigned integer. It
-  is also seralized with the least significant byte first.
+  is also seralized with the least significant byte first. 8 byte timestamps are
+  described in <xref target="time"/>.
   </t>
   <t>
     A Roughtime packet is a UDP packet whose contents are interpreted
@@ -252,17 +261,16 @@ RFC7384 SYSTEM
       <t>
         <list>
           <t>ROOT contains the root hash value of a Merkle tree using SHA512 as described when we reach the PATH and INDX blocks</t>
-          <t>MIDP contains an uint64 value consisting of the number of microseconds since the Unix epoch.</t>
-          <t>RADI contains the server's estimate of the accuracy of MIDP. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.</t>
-          <t>LEAP contains the TAI-UTC offset at MIDP as a signed 32 bit integer in two's complement. In cases of ambiguity due to leap seconds either acceptable offset result is acceptable.</t>
+          <t>MIDP contains an 8 byte timestamp of the moment of processing</t>
+          <t>RADI is a u32 contains the server's estimate of the accuracy of MIDP in microseconds. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.</t>
         </list>
       </t>
     </section>
     <section title="DELE">
       <t>
         <list>
-          <t>MINT is the minimum uint64 timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validity.</t>
-          <t>MAXT is the maximum uint64 timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.</t>
+          <t>MINT is the minimum 8 byte timestamp at which the key in PUBK is trusted to begin signing time. MIDP &gt; MINT for validity.</t>
+          <t>MAXT is the maximum 8 byte timestamp at which PUBK may sign. MIDP &lt; MAXT for validity.</t>
           <t>PUBK is a temporary Ed25519 public key. The use of this field is to enable seperation of a root public key from keys on
           devices exposed to the public Internet.</t>
         </list>
@@ -302,31 +310,50 @@ RFC7384 SYSTEM
     </t>
   </section>
 </section>
-<section title="Time">
+<section title="Time" anchor="time">
   <t>
-    All times in Roughtime are the number of seconds since the Unix epoch. The Unix epoch is midnight, 1 January, 1970. This is a constant offset from TAI.<xref target="TAI"/>
-    Servers SHOULD use GPS or other realizations of TAI that have been highly accurate in the past for Roughtime to meet their accuracy promises.
+    An 8 byte timestamp contains a 4 byte Modified Julian Date (as in <xref target="MJD"/> followed by a 4 byte count of the number of microseconds since midnight on that day. This is not a unique
+    representation: leap seconds are handled by changing the day number early or late, and hence having the number of microseconds increase even more. Unlike NTP this is not a representation that uses the full number of bits in the fraction part.
   </t>
 </section>
 
 <section title="Cheater detection">
-  <t> A chain of responses is a series of responses where the SHA-512 hash of the preceding response H, is concatenated with a 64 byte blind X, and then SHA-512(H, X)  is the NONC used in the subsequent response. These may be represented as an array of objects
-  in JSON where each object may have keys "blind" and "packet". Packet has the base64 encoded bytes of the packet and blind is the blind used for the next nonce. The last packet needs no blind.</t>
+  <t> A chain of responses is a series of responses where the SHA-512
+  hash of the preceding response H, is concatenated with a 64 byte
+  blind X, and then SHA-512(H, X) is the NONC used in the subsequent
+  response. These may be represented as an array of objects in JSON
+  where each object may have keys "blind" and "packet". Packet has the
+  base64 encoded bytes of the packet and blind is the blind used for
+  the next nonce. The last packet needs no blind.</t>
 
-  <t>A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt; MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such that i &lt; j, (r_i, r_j) is an invalid pair.</t>
+  <t>A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt;
+  MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j
+  such that i &lt; j, (r_i, r_j) is an invalid pair.</t>
 
-  <t>Invalidity of a chain is proof that causality has been violated if all servers were reporting correct time. An invalid chain where all individual responses are valid is cryptographic proof of malfeasance of at least one server: if all servers had the
-  correct time in the chain, causality would imply that MIDP_1-RADI_1 &lt; MIDP_2+RADI_2.
+  <t>Invalidity of a chain is proof that causality has been violated
+  if all servers were reporting correct time. An invalid chain where
+  all individual responses are valid is cryptographic proof of
+  malfeasance of at least one server: if all servers had the correct
+  time in the chain, causality would imply that MIDP_1-RADI_1 &lt;
+  MIDP_2+RADI_2.
   </t>
+
+  <t> In conducting the comparison of timestamps one must know the length of a day and hence
+  have historical leap second data for the days in question. However if violations are greater
+  then a second the loss of leap second data doesn't impede their detection.</t>
 </section>
 <section title="Grease">
-  <t> Servers MAY send back a fraction of responses that are syntactically invalid or contain invalid signatures as well as incorrect times. Clients MUST properly reject such responses. Servers MUST NOT send back responses with incorrect times and valid signatures.
-  Either signature MAY be invalid for this application.
+  <t> Servers MAY send back a fraction of responses that are
+  syntactically invalid or contain invalid signatures as well as
+  incorrect times. Clients MUST properly reject such
+  responses. Servers MUST NOT send back responses with incorrect times
+  and valid signatures.  Either signature MAY be invalid for this
+  application.
   </t>
 </section>
 <section title="Roughtime Servers">
   <t>
-    The below list contains a list of servers with their public keys in Base64 format.
+    The below list contains a list of servers with their public keys in Base64 format. These servers implement an older version of this specification.
   <list>
     <t> roughtime.int08h.com:2002; AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=</t>
     <t> roughtime.cloudflare.com:2002; gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=</t>
@@ -337,14 +364,11 @@ RFC7384 SYSTEM
 <section title="Trust anchors and policies">
   <t>
   A trust anchor is any distributor of a list of trusted servers. It is RECOMMENDED that trust
-  anchors subscribe to TBD where evidence of malfeasance may be shared and discussed. Trust anchors
+  anchors subscribe to a common public forum where evidence of malfeasance may be shared and discussed. Trust anchors
   SHOULD subscribe to a zero-tolerance policy: any generation of incorrect timestamps will result in
   removal. To enable this trust anchors SHOULD list a wide variety of servers so the removal of
   a server does not result in operational issues for clients. Clients SHOULD attempt to detect
   malfeasance and have a way to report it to trust anchors.
-  </t>
-  <t> Trust anchors SHOULD include any roughtime server with an uptime greater then 99.9% over the past
-  6 months and with no malfeasance. They SHOULD also aggressively collect evidence of such malfeasance.
   </t>
   <t> Because only a single roughtime server is required for successful synchronization, Roughtime
   does not have the incentive problems that have prevented effective enforcement of discipline on the
@@ -447,16 +471,16 @@ RFC7384 SYSTEM
         <date year="2012"/>
       </front>
     </reference>
-    <reference anchor="TAI" target="https://www.bipm.org/en/bipm-services/timescales/tai.html">
+    <reference>
       <front>
-        <title>International Atomic Time (TAI)</title>
-        <author>
-          <organization>Bureau International des Poids et Mesures</organization>
-        </author>
+	<title>Resolution B1</title>
+	<author>
+	  <organization>
+	    International Earth Rotation and Reference Systems Service
+	  </organization>
+	</author>
       </front>
     </reference>
-          
-
   </references>
 </back>
 </rfc>
