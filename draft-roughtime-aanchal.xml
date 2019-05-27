@@ -26,7 +26,7 @@ RFC7384 SYSTEM
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-roughtime-aanchal-01" ipr="trust200902">
+<rfc category="info" docName="draft-roughtime-aanchal-02" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -61,7 +61,7 @@ RFC7384 SYSTEM
         </address>
     </author>
 
-    <date year="2019" month="March" day="1"/>
+    <date year="2019" month="May" day="27"/>
 
     <area>General</area>
 
@@ -114,6 +114,19 @@ RFC7384 SYSTEM
     <t>
       Y** For security issues with Autokey Public Key Authentication, refer to <xref target="Autokey"/> 
     </t>
+    <t>
+      More specifically, 
+    </t>
+    <t>
+      <list style="symblols">
+      <t> If a server's timestamps do not fit into the time context of other servers' responses, then a Roughtime client can cryptographically prove this misbehaviour to third parties. This helps detect "bad" servers.</t>
+
+      <t> A Roughtime client can roughly detect (with no absolute guarantee) a delay attack <xref target="DelayAttacks"/> but can not cryptographically prove this to a third party. However, the absence of proof of malfeasance SHOULD not be considered a proof of absence of malfeasance. So Roughtime SHOULD not be used as a witness that a server is overall "good".</t>
+
+      <t>Note that the delay attacks cannot be detected/stopped by any protocol. Delay attacks can not, however, undermine the security guarantees provided by Roughtime. </t>
+    </list>
+    </t>
+    
     </section>
     
 <section title = "Requirements Language">
@@ -182,7 +195,7 @@ RFC7384 SYSTEM
     misbehaving server.
   </t>
 </section>
-<section title="The guarrentee">
+<section title="The guarantee">
   <t>
   A Roughtime response to a query sent at t_1, received at t_2, and with timestamp t_3 is guaranteed to have been created
   between the transmission of the query and its reception. If t_3 is not within that interval, a server inconsistency may be detected
@@ -259,7 +272,7 @@ RFC7384 SYSTEM
     </t>
     <section title="SREP">
       <t>
-        <list>
+        <list style="symbols">
           <t>ROOT contains the root hash value of a Merkle tree using SHA512 as described when we reach the PATH and INDX blocks</t>
           <t>MIDP contains an 8 byte timestamp of the moment of processing</t>
           <t>RADI is a u32 contains the server's estimate of the accuracy of MIDP in microseconds. Servers MUST ensure the true time is within (MIDP-RADI, MIDP+RADI) at the time they compose the response packet.</t>
@@ -378,8 +391,7 @@ RFC7384 SYSTEM
 
 <section anchor="Acknowledgements" title="Acknowledgements">
   <t>
-    Thomas Peterson corrected multiple nits. Marcus Dansarie, Tal Mizrahi, and the other members of the NTP
-    working group contributed comments and suggestions.
+    Thomas Peterson corrected multiple nits. Marcus Dansarie, Kristof Teichel, Tal Mizrahi, and the other members of the NTP working group contributed comments and suggestions.
   </t>
 </section>
 
@@ -460,6 +472,26 @@ RFC7384 SYSTEM
         <date year="2015"/>
       </front>
     </reference>
+    <reference anchor="DelayAttacks" target="https://ieeexplore.ieee.org/document/6336612">
+      <front>
+        <title>A Game Theoretic Analysis of Delay Attacks Against Time Synchronization Protocols</title>
+        
+        <author initials="T." surname="Mizrahi" fullname="Tal Mizrahi">
+          <organization/>
+        </author>
+        <date year="2012"/>
+      </front>
+    </reference>
+    <reference anchor="MJD">
+      <front>
+        <title>The Origin of the Julian Day System</title>
+        
+        <author initials="G." surname="Moyer" fullname="Gordon Moyer">
+          <organization/>
+        </author>
+        <date year="1981"/>
+      </front>
+    </reference>
     <reference anchor="Autokey" target="https://zero-entropy.de/autokey_analysis.pdf">
       <front>
         <title>Analysis of the NTP Autokey Procedures</title>
@@ -471,7 +503,7 @@ RFC7384 SYSTEM
         <date year="2012"/>
       </front>
     </reference>
-    <reference>
+    <reference anchor= "resolution">
       <front>
 	<title>Resolution B1</title>
 	<author>
@@ -479,6 +511,7 @@ RFC7384 SYSTEM
 	    International Earth Rotation and Reference Systems Service
 	  </organization>
 	</author>
+  <date year="2000"/>
       </front>
     </reference>
   </references>
