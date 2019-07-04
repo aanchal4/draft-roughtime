@@ -67,21 +67,19 @@
   <middle>
     <section title="Motivation">
       <t>
-        Time synchronization is essential to Internet security as many
-        security protocols and other applications require
-        synchronization <xref target="RFC7384"/><xref
-        target="MCBG"/>. Unfortunately widely deployed protocols such
-        as the Network Time Protocol (NTP) <xref target="RFC5905"/>
-        lack essential security features, and even newer protocols
-        like Network Time Security (NTS) <xref
-        target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that
-        the servers behave correctly. Authenticating time servers
-        prevents network adversaries from modifying time packets, but
-        an authenticated time server still has full control over the
-        contents of time packet and may go rogue. The Roughtime protocol
-        provides cryptographic proof of malfeasance, enabling clients
-        to detect and prove to a third party server's attempts to
-        influence the time a client computes.
+        Time synchronization is essential to Internet security as many security
+        protocols and other applications require synchronization
+        <xref target="RFC7384"/> <xref target="MCBG"/>. Unfortunately widely
+        deployed protocols such as the Network Time Protocol (NTP)
+        <xref target="RFC5905"/> lack essential security features, and even
+        newer protocols like Network Time Security (NTS)
+        <xref target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that the
+        servers behave correctly. Authenticating time servers prevents network
+        adversaries from modifying time packets, but an authenticated time
+        server still has full control over the contents of the time packet and
+        may go rogue. The Roughtime protocol provides cryptographic proof of
+        malfeasance, enabling clients to detect and prove to a third party a
+        server's attempts to influence the time a client computes.
       </t>
       <texttable anchor="existing_approaches">
         <ttcol align='center'>Protocol</ttcol>
@@ -97,11 +95,11 @@
       <t>
         Y* For security issues with symmetric-key based NTP-MD5 authentication,
         please refer to <xref target="I-D.ietf-ntp-mac">Message Authentication
-        Code for the Network Time Protocol draft</xref>
+        Code for the Network Time Protocol draft</xref>.
       </t>
       <t>
         Y** For security issues with Autokey Public Key Authentication, refer to
-        <xref target="Autokey"/>
+        <xref target="Autokey"/>.
       </t>
       <t>
         More specifically,
@@ -123,9 +121,9 @@
             server is overall "good".
           </t>
           <t>
-            Note that the delay attacks cannot be detected/stopped by any
-            protocol. Delay attacks can not, however, undermine the security
-            guarantees provided by Roughtime.
+            Note that delay attacks cannot be detected/stopped by any protocol.
+            Delay attacks can not, however, undermine the security guarantees
+            provided by Roughtime.
           </t>
         </list>
       </t>
