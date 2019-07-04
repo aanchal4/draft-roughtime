@@ -94,8 +94,7 @@
       </texttable>
       <t>
         Y* For security issues with symmetric-key based NTP-MD5 authentication,
-        please refer to <xref target="I-D.ietf-ntp-mac">Message Authentication
-        Code for the Network Time Protocol draft</xref>.
+        please refer to <xref target="RFC8573">RFC 8573</xref>.
       </t>
       <t>
         Y** For security issues with Autokey Public Key Authentication, refer to
@@ -531,8 +530,8 @@
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
+      <?rfc include="reference.RFC.8573.xml"?>
       <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
-      <?rfc include="reference.I-D.ietf-ntp-mac.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
