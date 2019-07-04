@@ -212,8 +212,8 @@
     <section title="Message Format">
       <t>
         Roughtime messages are maps consisting of one or more (tag, value)
-        pairs. They start with a header, which contains the number of tags, the
-        tag names, and value offsets. The header is followed by a message values
+        pairs. They start with a header, which contains the number of pairs, the
+        tags, and value offsets. The header is followed by a message values
         section which contains the values associated with the tags in the
         header. Messages MUST be formatted according to
         <xref target="fig-roughtime-message"/> as described in the following
@@ -228,7 +228,7 @@
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Number of tags (uint32)                    |
+|                   Number of pairs (uint32)                    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 .                                                               .
@@ -268,7 +268,7 @@
 
         <section title="Tag" anchor="tag">
           <t>
-            Tags are used to identify fields in Roughtime packets. A tag is a
+            Tags are used to identify values in Roughtime packets. A tag is a
             uint32 but may also be listed as a sequence of up to four ASCII
             characters <xref target="RFC0020"/>. ASCII strings shorter than four
             characters can be unambiguously converted to tags by padding them
