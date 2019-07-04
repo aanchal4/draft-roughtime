@@ -717,30 +717,38 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
 
     <section title="Security Considerations">
       <t>
-        This protocol will not survive the advent of quantum computers.
-        Currently only one signature scheme is supported. Maintaining a list of
-        trusted servers and adjudicating violations of the rules by servers are
-        not discussed in this document and are essential for security.
-        Arithmetic on the adjusted timescale is interesting with intervals, and
-        this may impact the interpretation of the MAXT and MINT fields. Servers
-        carry out a significant amount of computation in response to clients,
-        and thus may experience vulnerability to denial of service attacks.
+        Since the only supported signature scheme, Ed25519, is not quantum
+        resistant, this protocol will not survive the advent of quantum
+        computers.
+      </t>
+      <t>
+        Maintaining a list of trusted servers and adjudicating violations of the
+        rules by servers are not discussed in this document and are essential
+        for security. Roughtime clients MUST update their view of which servers
+        are trustworthy in order to benefit from the detection of misbehavior.
+      </t>
+      <t>
+        Validating timestamps made on different dates requires knowledge of leap
+        seconds in order to calculate time intervals correctly.
+      </t>
+      <t>
+        Servers carry out a significant amount of computation in response to
+        clients, and thus may experience vulnerability to denial of service
+        attacks.
       </t>
       <t>
         This protocol does not provide any confidentiality, and given the nature
-        of timestamps such impact is minor. The compromise of a PUBK's private
+        of timestamps such impact is minor.
+      </t>
+      <t>
+        The compromise of a PUBK's private
         key, even past MAXT, is a problem as the private key can be used to sign
         invalid times that are in the range MINT to MAXT, and thus violate the
         good behavior guarantee of the server.
       </t>
       <t>
-        Roughtime clients MUST update their view of which servers are
-        trustworthy in order to benefit from the detection of misbehavior.
-      </t>
-      <t>
-        Packets sent by the client MUST be at least 1024 bytes in length in
-        order to mitigate amplification attacks, and servers MUST ignore request
-        packets that are smaller than this length.
+        Servers MUST NOT send response packets larger than the request packets
+        sent by clients, in order to prevent amplification attacks.
       </t>
     </section>
 
@@ -748,7 +756,9 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <t>
         This protocol is designed to obscure all client identifiers. Servers
         necessarily have persistent long term identities essential to enforcing
-        correct behavior.
+        correct behavior. Generating nonces from previous responses without
+        using a blind can enable tracking of clients as they move between
+        networks.
       </t>
     </section>
   </middle>
@@ -762,6 +772,7 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.8259.xml"?>
     </references>
     <references title="Informative References">
+      <?rfc include="reference.RFC.0768.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.6234.xml"?>
@@ -830,5 +841,22 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         </front>
       </reference>
     </references>
+
+    <section title="Terms and Abbreviations">
+      <t>
+        <list style="hanging">
+          <t hangText="ASCII ">American Standard Code for Information
+              Interchange</t>
+          <t hangText="IANA  ">Internet Assigned Numbers Authority</t>
+          <t hangText="MJD   ">Modified Julian Date</t>
+          <t hangText="NTP   "><xref target="RFC5905">Network Time Protocol
+              </xref></t>
+          <t hangText="NTS   "><xref target="I-D.ietf-ntp-using-nts-for-ntp">
+              Network Time Security</xref></t>
+          <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
+              </xref></t>
+        </list>
+      </t>
+    </section>
   </back>
 </rfc>
