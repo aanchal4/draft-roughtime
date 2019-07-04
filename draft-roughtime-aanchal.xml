@@ -529,7 +529,6 @@
       <?rfc include="reference.RFC.8032.xml"?>
     </references>
     <references title="Informative References">
-      <?rfc include="reference.RFC.5280.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
