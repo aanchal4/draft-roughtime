@@ -211,45 +211,115 @@
 
     <section title="Message Format">
       <t>
-        A uint32 is a 32 bit unsigned integer. It is serialized in bytes with
-        the least significant byte first. A uint64 is a 64 bit unsigned integer.
-        It is also seralized with the least significant byte first. 8 byte
-        timestamps are described in <xref target="time"/>.
+        Roughtime messages are maps consisting of one or more (tag, value)
+        pairs. They start with a header, which contains the number of tags, the
+        tag names, and value offsets. The header is followed by a message values
+        section which contains the values associated with the tags in the
+        header. Messages MUST be formatted according to
+        <xref target="fig-roughtime-message"/> as described in the following
+        sections.
       </t>
       <t>
-        A Roughtime packet is a UDP packet whose contents are interpreted as a
-        map from uint32s to strings of bytes. The byte strings must all have
-        lengths a multiple of four. All uint32 are encoded with the least
-        significant byte first. The keys of this map are called tags, and we
-        speak of the value of a tag as the string of bytes it is mapped to.
+        Messages may be recursive, i.e. the value of a tag can itself be a
+        Roughtime message.
       </t>
-      <t>
-        A Roughtime packet is serialized as follows: First there is a header,
-        The first four bytes in the header are the uint32 number of tags N, and
-        hence of (tag, value) pairs.  4*(N-1) bytes are offsets, each offset a
-        uint32. The last 4*N bytes are the tags.
-      </t>
-      <t>
-        Tags are in ascending order, and no tag can be repeated. Offsets are all
-        a multiple of four and MUST be strictly increasing. The offset array is
-        considered to have a not explicitly encoded value of 0 as its zeroeth
-        entry.
-      </t>
-      <t>
-        Immediately following the header is a concatenation of all the strings.
-        The first post-header byte is at offset 0, and the end of the final byte
-        string is indicated by the end of the packet. The ith byte string ends
-        at offset[i+1]-1, counting of course from 0, and begins at offset[i]. It
-        is the value associated to the ith tag.
-      </t>
-      <t>
-        This encoding may be recursive: a value may be said to be in Roughtime
-        format and thus have a header, etc. Tags may be listed as four ASCII
-        characters <xref target="RFC0020"/>. In this case the tag when
-        serialized will be those four ASCII characters. For example NONC would
-        be the numeric value 0x434e4f4e. They may also be listed as fewer then
-        four ASCII characters with hex escape codes at the end.
-      </t>
+      <figure anchor="fig-roughtime-message" title="Roughtime Message Format">
+        <artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Number of tags (uint32)                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+.                                                               .
+.                     N-1 offsets (uint32)                      .
+.                                                               .
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+.                                                               .
+.                        N tags (uint32)                        .
+.                                                               .
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+.                                                               .
+.                            Values                             .
+.                                                               .
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]>
+        </artwork>
+      </figure>
+
+      <section title="Data Types">
+        <section title="uint32">
+          <t>
+            A uint32 is a 32 bit unsigned integer. It is serialized with the
+            least significant byte first.
+          </t>
+        </section>
+
+        <section title="uint64">
+          <t>
+            A uint64 is a 64 bit unsigned integer. It is serialized with the
+            least significant byte first.
+          </t>
+        </section>
+
+        <section title="Tag">
+          <t>
+            Tags are used to identify fields in Roughtime packets. A tag is a
+            uint32 but may also be listed as a sequence of up to four ASCII
+            characters <xref target="RFC0020"/>. ASCII strings shorter than four
+            characters can be unambiguously converted to tags by padding them
+            with zero bytes. For example, the ASCII string "NONC" would
+            correspond to the tag 0x434e4f4e and "PAD" would correspond to
+            0x00444150.
+          </t>
+        </section>
+
+        <section title="Timestamp">
+          <t>
+            A timestamp is a uint64 interpreted in the following way. The most
+            significant 3 bytes contain the integer part of a Modified Julian
+            Date (MJD). The least significant 5 bytes is a count of the number
+            of microseconds since midnight on that day.
+          </t>
+          <t>
+            The MJD is the number of days since 17 November 1858
+            <xref target="ITU-T_TF.457-2"/>.
+          </t>
+          <t>
+            Note that, unlike NTP, this representation does not use the full
+            number of bits in the fractional part and that days with leap
+            seconds will have more or fewer than the nominal 86,400,000,000
+            microseconds.
+          </t>
+        </section>
+      </section>
+
+      <section title="Header">
+        <t>
+          All Roughtime messages start with a header. The first four bytes of
+          the header is the uint32 number of tags N, and hence of (tag, value)
+          pairs. The following 4*(N-1) bytes are offsets, each a uint32. The
+          last 4*N bytes in the header are tags.
+        </t>
+        <t>
+          Offsets refer to the positions of the values in the message values
+          section. All offsets MUST be multiples of four and placed in
+          increasing order. The first post-header byte is at offset 0. The
+          offset array is considered to have a not explicitly encoded value of 0
+          as its zeroth entry. The value associated with the ith tag begins at
+          offset[i] and ends at offset[i+1]-1, with the exception of the last
+          value which ends at the end of the packet. Values may have zero
+          length.
+        </t>
+        <t>
+          Tags MUST be listed in the same order as their corresponding offsets.
+          A tag MUST NOT appear more than once in a header.
+        </t>
+      </section>
     </section>
 
     <section title="Protocol">
