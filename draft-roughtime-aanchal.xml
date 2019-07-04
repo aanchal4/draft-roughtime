@@ -3,7 +3,7 @@
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <?rfc strict="yes"?>
-<?rfc toc="no"?>
+<?rfc toc="yes"?>
 <?rfc tocdepth="3"?>
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes"?>
