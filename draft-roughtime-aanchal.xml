@@ -143,43 +143,49 @@
         Roughtime is a protocol for rough time synchronization that enables
         clients to provide cryptographic proof of server malfeasance. It does so
         by having responses from servers include a signature with a certificate
-        rooted in long term public/private key pair over a portion of the
-        initial request, thus providing cryptographic proof that the timestamp
-        was issued after previous responses and before future ones.
+        rooted in a long term public/private key pair over a value derived from
+        a nonce provided by the client in its request. This provides
+        cryptographic proof that the timestamp was issued after the server
+        received the client's request. The derived value included in the
+        server's response is the root of a Merkle tree which includes the hash
+        of the client's nonce as one of its leaves. This enables the server to
+        amortize the relatively costly signing operation over a number of client
+        requests.
       </t>
       <t>
         Single server mode: At its most basic level, Roughtime is a one round
         protocol in which a completely fresh client requests the current time
         and the server sends a signed response. The response includes a
-        timestamp (the number of microseconds since the Unix epoch) and a radius
-        (in microseconds) used to indicate the server's certainty about the
+        timestamp and a radius used to indicate the server's certainty about the
         reported time. For example, a radius of 1,000,000 microseconds means the
         server is absolutely confident that the true time is within one second
         of the reported time.
       </t>
       <t>
-        The server proves freshness of its response as follows: The request
-        contains a random challenge. The server incorporates the challenge into
-        its signed response so that its needed to verify the signature. This
-        proves that the signed response could only have been generated after the
-        challenge was issued if the challenge has sufficient entropy.
+        The server proves freshness of its response as follows: The client's
+        request contains a nonce. The server incorporates the nonce into its
+        signed response so that the client can verify that the response was
+        created after the nonce. Provided that the nonce has sufficient entropy,
+        this proves that the signed response could only have been generated
+        after the nonce.
       </t>
       <t>
         Chaining multiple servers: For subsequent requests, the client generates
-        its nonce by hashing the reply from the first server with a random
-        value. This proves that the nonce was created after the reply from the
-        first server. It sends that to the second server and receives a
-        signature from it covering that nonce and the time from the second
-        server.
+        a new nonce by hashing the reply from the previous server with a random
+        value (a blind). This proves that the nonce was created after the reply
+        from the previous server. It sends the new nonce in a request to the
+        next server and receives a response that includes a signature covering
+        the nonce.
       </t>
       <t>
         Cryptographic proof of misbehavior: If the time from the second server
-        is before the first, then the client has proof of misbehavior; the reply
-        from the second server implicitly shows that it was created later
-        because of the way that the client constructed the nonce. If the time
-        from the second server is after, then the client can contact the first
-        server again and get a signature that was provably created afterwards,
-        but with an earlier timestamp.
+        is before the first, then the client has proof that at least one of the
+        servers is misbehaving; the reply from the second server implicitly
+        shows that it was created later because of the way that the client
+        constructed the nonce. If the time from the second server is too far in
+        the future, the client can contact the first server again with a new
+        nonce generated from the second server's response and get a signature
+        that was provably created afterwards, but with an earlier timestamp.
       </t>
       <t>
         With only two servers, the client can end up with proof that something
@@ -187,7 +193,7 @@
         more independent servers, the client will end up with chain of proof of
         any server's misbehavior, signed by several others, and (presumably)
         enough accurate replies to establish what the correct time is.
-        Furthermore this proof may be validated by third parties ultimately
+        Furthermore, this proof may be validated by third parties ultimately
         leading to a revocation of trust in the misbehaving server.
       </t>
     </section>
