@@ -554,22 +554,27 @@
     <section title="Roughtime Servers">
       <t>
         The below list contains a list of servers with their public keys in
-        Base64 format. These servers implement an older version of this
+        Base64 format. These servers may implement older versions of this
         specification.
-        <list>
-          <t>
-            roughtime.int08h.com:2002;
-            AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=
-          </t>
-          <t>
-            roughtime.cloudflare.com:2002;
-            gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=
-          </t>
-          <t>
-            roughtime.sandbox.google.com:2002;
-            etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=
-          </t>
-        </list>
+        <figure>
+          <artwork>
+address:       roughtime.cloudflare.com
+port:          2002
+long term key: gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=
+
+address:       roughtime.int08h.com
+port:          2002
+long term key: AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=
+
+address:       roughtime.sandbox.google.com
+port:          2002
+long term key: etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=
+
+address:       roughtime.se
+port:          2002
+long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
+          </artwork>
+        </figure>
       </t>
     </section>
 
