@@ -380,8 +380,8 @@
     <section title="Time" anchor="time">
       <t>
         An 8 byte timestamp contains a 4 byte Modified Julian Date (as in
-        <xref target="MJD"/> followed by a 4 byte count of the number of
-        microseconds since midnight on that day. This is not a unique
+        <xref target="ITU-T_TF.457-2"/> followed by a 4 byte count of the number
+        of microseconds since midnight on that day. This is not a unique
         representation: leap seconds are handled by changing the day number
         early or late, and hence having the number of microseconds increase even
         more. Unlike NTP this is not a representation that uses the full number
@@ -570,14 +570,20 @@
         </front>
       </reference>
 
-      <reference anchor="MJD">
+      <reference anchor="ITU-T_TF.457-2">
         <front>
-          <title>The Origin of the Julian Day System</title>
-          <author initials="G." surname="Moyer" fullname="Gordon Moyer">
-            <organization/>
+          <title>
+            Use of the Modified Julian Date by the Standard-Frequency
+            and Time-Signal Services
+          </title>
+          <author>
+            <organization>
+              ITU-T
+            </organization>
           </author>
-          <date year="1981"/>
+          <date year="1997" month="October"/>
         </front>
+        <seriesInfo name="ITU-T Recommendation" value="TF-457-2"/>
       </reference>
 
       <reference anchor="Autokey"
@@ -588,18 +594,6 @@
             <organization/>
           </author>
           <date year="2012"/>
-        </front>
-      </reference>
-
-      <reference anchor= "resolution">
-        <front>
-          <title>Resolution B1</title>
-          <author>
-            <organization>
-              International Earth Rotation and Reference Systems Service
-            </organization>
-          </author>
-          <date year="2000"/>
         </front>
       </reference>
     </references>
