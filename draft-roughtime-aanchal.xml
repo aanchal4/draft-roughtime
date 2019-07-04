@@ -266,7 +266,7 @@
           </t>
         </section>
 
-        <section title="Tag">
+        <section title="Tag" anchor="tag">
           <t>
             Tags are used to identify fields in Roughtime packets. A tag is a
             uint32 but may also be listed as a sequence of up to four ASCII
@@ -606,10 +606,113 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     </section>
 
     <section anchor="IANA" title="IANA Considerations">
-      <t>
-        We request IANA assign a UDP port and create a new registry for
-        Roughtime tags.
-      </t>
+      <section title="Service Name and Transport Protocol Port Number Registry">
+        <t>
+          IANA is requested to allocate the following entry in the
+          <xref target="RFC6335">Service Name and Transport Protocol
+          Port Number Registry</xref>:
+          <list>
+            <t>Service Name: Roughtime</t>
+            <t>Transport Protocol: udp</t>
+            <t>Assignee: IESG &lt;iesg@ietf.org&gt;</t>
+            <t>Contact: IETF Chair &lt;chair@ietf.org&gt;</t>
+            <t>Description: Roughtime time synchronization</t>
+            <t>Reference: [[this memo]]</t>
+            <t>Port Number: [[TBD1]], selected by IANA from the User Port
+              range</t>
+          </list>
+        </t>
+      </section>
+
+      <section title="Roughtime Tag Registry">
+        <t>
+          IANA is requested to create a new registry entitled
+          &quot;Roughtime Tag Registry&quot;. Entries SHALL have
+          the following fields:
+          <list>
+            <t>
+              Tag Value (REQUIRED): A 32-bit unsigned integer in hexadecimal
+              format.
+            </t>
+            <t>
+              ASCII Representation (OPTIONAL): The ASCII representation of the
+              tag value in accordance with <xref target="tag"/> of this memo, if
+              applicable.
+            </t>
+            <t>
+              Reference (REQUIRED): A reference to a relevant specification
+              document.
+            </t>
+          </list>
+          The policy for allocation of new entries in this registry
+          SHOULD be: Specification Required.
+        </t>
+        <t>
+          The initial contents of this registry SHALL be as follows:
+        </t>
+        <texttable>
+          <ttcol>Tag Value</ttcol>
+          <ttcol>ASCII Representation</ttcol>
+          <ttcol>Reference</ttcol>
+
+          <c>0x00444150</c>
+          <c>PAD</c>
+          <c>[[this memo]]</c>
+
+          <c>0x00474953</c>
+          <c>SIG</c>
+          <c>[[this memo]]</c>
+
+          <c>0x434e4f48</c>
+          <c>NONC</c>
+          <c>[[this memo]]</c>
+
+          <c>0x454c4544</c>
+          <c>DELE</c>
+          <c>[[this memo]]</c>
+
+          <c>0x48544150</c>
+          <c>PATH</c>
+          <c>[[this memo]]</c>
+
+          <c>0x49444152</c>
+          <c>RADI</c>
+          <c>[[this memo]]</c>
+
+          <c>0x4b425550</c>
+          <c>PUBK</c>
+          <c>[[this memo]]</c>
+
+          <c>0x5044494d</c>
+          <c>MIDP</c>
+          <c>[[this memo]]</c>
+
+          <c>0x50455253</c>
+          <c>SREP</c>
+          <c>[[this memo]]</c>
+
+          <c>0x544e494d</c>
+          <c>MINT</c>
+          <c>[[this memo]]</c>
+
+          <c>0x544f4f52</c>
+          <c>ROOT</c>
+          <c>[[this memo]]</c>
+
+          <c>0x54524543</c>
+          <c>CERT</c>
+          <c>[[this memo]]</c>
+
+          <c>0x5458414d</c>
+          <c>MAXT</c>
+          <c>[[this memo]]</c>
+
+          <c>0x58444e49</c>
+          <c>INDX</c>
+          <c>[[this memo]]</c>
+
+        </texttable>
+      </section>
     </section>
 
     <section title="Security Considerations">
@@ -654,6 +757,7 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     <references title="Normative References">
       <?rfc include="reference.RFC.0020.xml"?>
       <?rfc include="reference.RFC.4648.xml"?>
+      <?rfc include='reference.RFC.6335.xml'?>
       <?rfc include="reference.RFC.8032.xml"?>
       <?rfc include="reference.RFC.8259.xml"?>
     </references>
