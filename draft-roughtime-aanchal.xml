@@ -510,14 +510,15 @@
       </section>
     </section>
 
-    <section title="Cheater detection" anchor="cheater-detection">
+    <section title="Cheater Detection" anchor="cheater-detection">
       <t>
         A chain of responses is a series of responses where the SHA-512 hash of
         the preceding response H, is concatenated with a 64 byte blind X, and
-        then SHA-512(H, X) is the NONC used in the subsequent response. These
-        may be represented as an array of objects in JSON where each object may
-        have keys "blind" and "packet". Packet has the base64 encoded bytes of
-        the packet and blind is the blind used for the next nonce. The last
+        then SHA-512(H, X) is the nonce used in the subsequent response. These
+        may be represented as an array of objects in JSON
+        <xref target="RFC8259"/> where each object may have keys "blind" and
+        "packet". Packet has the Base64 <xref target="RFC4648"/> encoded bytes
+        of the packet and blind is the blind used for the next nonce. The last
         packet needs no blind.
       </t>
       <t>
@@ -647,7 +648,9 @@
   <back>
     <references title="Normative References">
       <?rfc include="reference.RFC.0020.xml"?>
+      <?rfc include="reference.RFC.4648.xml"?>
       <?rfc include="reference.RFC.8032.xml"?>
+      <?rfc include="reference.RFC.8259.xml"?>
     </references>
     <references title="Informative References">
       <?rfc include="reference.RFC.2119.xml"?>
