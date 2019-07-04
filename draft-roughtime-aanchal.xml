@@ -574,7 +574,7 @@
           </author>
           <date year="1997" month="October"/>
         </front>
-        <seriesInfo name="ITU-T Recommendation" value="TF-457-2"/>
+        <seriesInfo name="ITU-T Recommendation" value="TF.457-2"/>
       </reference>
 
       <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
