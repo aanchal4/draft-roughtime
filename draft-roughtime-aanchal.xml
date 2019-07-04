@@ -363,7 +363,7 @@
           message with the tags ROOT, MIDP, and RADI.
         </t>
         <t>
-          The ROOT tag contains a 64 byte root hash value of a Merkle tree as
+          The ROOT tag contains a 32 byte value of a Merkle tree root as
           described in <xref target="merkle-tree"/>.
         </t>
         <t>
@@ -416,11 +416,11 @@
           <xref target="merkle-tree"/>.
         </t>
         <t>
-          The PATH tag value is a multiple of 64 bytes long and represents a
-          path of 64 byte hashes in the Merkle tree used to generate the ROOT
-          value as described in <xref target="merkle-tree"/>. In the special
-          case where a response is made for a single request and the Merkle tree
-          contains only the root node, the size of PATH is zero.
+          The PATH tag value is a multiple of 32 bytes long and represents a
+          path of 32 byte hash values in the Merkle tree used to generate the
+          ROOT value as described in <xref target="merkle-tree"/>. In the
+          special case where a response is made for a single request and the
+          Merkle tree contains only the root node, the size of PATH is zero.
         </t>
       </section>
 
@@ -437,11 +437,11 @@
         </t>
         <t>
           The values of all nodes are calculated from the leaf nodes and up
-          towards the root node using the SHA-512 hash algorithm
-          <xref target="RFC6234"/>. For leaf nodes, the byte 0x00 is prepended
-          to the nonce before applying the hash function. For all other nodes,
-          the byte 0x01 is concatenated with first the left and then the right
-          child node value before applying the hash function.
+          towards the root node using the first 32 bytes of the output of the
+          SHA-512 hash algorithm <xref target="RFC6234"/>. For leaf nodes, the
+          byte 0x00 is prepended to the nonce before applying the hash function.
+          For all other nodes, the byte 0x01 is concatenated with first the left
+          and then the right child node value before applying the hash function.
         </t>
         <t>
           The value of the Merkle tree's root node is included in the ROOT tag
