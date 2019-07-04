@@ -104,11 +104,11 @@
         More specifically,
       </t>
       <t>
-        <list style="symblols">
+        <list style="symbols">
           <t>
             If a server's timestamps do not fit into the time context of other
             servers' responses, then a Roughtime client can cryptographically
-            prove this misbehaviour to third parties. This helps detect "bad"
+            prove this misbehavior to third parties. This helps detect "bad"
             servers.
           </t>
           <t>
