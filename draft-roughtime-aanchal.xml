@@ -450,18 +450,6 @@
       </section>
     </section>
 
-    <section title="Time" anchor="time">
-      <t>
-        An 8 byte timestamp contains a 4 byte Modified Julian Date (as in
-        <xref target="ITU-T_TF.457-2"/> followed by a 4 byte count of the number
-        of microseconds since midnight on that day. This is not a unique
-        representation: leap seconds are handled by changing the day number
-        early or late, and hence having the number of microseconds increase even
-        more. Unlike NTP this is not a representation that uses the full number
-        of bits in the fraction part.
-      </t>
-    </section>
-
     <section title="Cheater detection">
       <t>
         A chain of responses is a series of responses where the SHA-512 hash of
