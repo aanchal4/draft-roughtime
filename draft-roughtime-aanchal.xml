@@ -529,29 +529,21 @@
       <?rfc include="reference.RFC.8032.xml"?>
     </references>
     <references title="Informative References">
+      <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
-      <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
       <?rfc include="reference.I-D.ietf-ntp-mac.xml"?>
 
-      <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
+      <reference anchor="Autokey"
+          target="https://zero-entropy.de/autokey_analysis.pdf">
         <front>
-          <title>Attacking the Network Time Protocol</title>
-          <author initials="A." surname="Malhotra" fullname="A. Malhotra">
+          <title>Analysis of the NTP Autokey Procedures</title>
+          <author initials="S." surname="Rottger">
             <organization/>
           </author>
-          <author initials="I." surname="Cohen" fullname="I. Cohen">
-            <organization/>
-          </author>
-          <author initials="E." surname="Brakke" fullname="E. Brakke">
-            <organization/>
-          </author>
-          <author initials="S." surname="Goldberg" fullname="S. Goldberg">
-            <organization/>
-          </author>
-          <date year="2015"/>
+          <date year="2012"/>
         </front>
       </reference>
 
@@ -585,14 +577,22 @@
         <seriesInfo name="ITU-T Recommendation" value="TF-457-2"/>
       </reference>
 
-      <reference anchor="Autokey"
-          target="https://zero-entropy.de/autokey_analysis.pdf">
+      <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
         <front>
-          <title>Analysis of the NTP Autokey Procedures</title>
-          <author initials="S." surname="Rottger">
+          <title>Attacking the Network Time Protocol</title>
+          <author initials="A." surname="Malhotra" fullname="A. Malhotra">
             <organization/>
           </author>
-          <date year="2012"/>
+          <author initials="I." surname="Cohen" fullname="I. Cohen">
+            <organization/>
+          </author>
+          <author initials="E." surname="Brakke" fullname="E. Brakke">
+            <organization/>
+          </author>
+          <author initials="S." surname="Goldberg" fullname="S. Goldberg">
+            <organization/>
+          </author>
+          <date year="2015"/>
         </front>
       </reference>
     </references>
