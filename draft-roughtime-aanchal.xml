@@ -377,11 +377,11 @@
         </t>
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
-          <xref target="RFC8032"/> over a certificate context concatenated with
+          <xref target="RFC8032"/> over a signature context concatenated with
           the entire value a DELE or SREP tag. Signatures of DELE tags use the
           ASCII string "RoughTime v1 delegation signature--" and signatures of
           SREP tags use the ASCII string "RoughTime v1 response signature" as
-          certificate context. Both strings include a terminating zero byte.
+          signature context. Both strings include a terminating zero byte.
         </t>
         <t>
           The CERT tag contains a signing key certificate signed with a long
