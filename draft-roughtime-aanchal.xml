@@ -519,11 +519,12 @@
         A chain of responses is a series of responses where the SHA-512 hash of
         the preceding response H, is concatenated with a 64 byte blind X, and
         then SHA-512(H, X) is the nonce used in the subsequent response. These
-        may be represented as an array of objects in JSON
-        <xref target="RFC8259"/> where each object may have keys "blind" and
-        "response_packet". Packet has the Base64 <xref target="RFC4648"/>
-        encoded bytes of the packet and blind is the Base64 encoded blind used
-        for the next nonce. The last packet needs no blind.
+        may be represented as an array of objects in JavaScript Object Notation
+        (JSON) format <xref target="RFC8259"/> where each object may have keys
+        "blind" and "response_packet". Packet has the Base64
+        <xref target="RFC4648"/> encoded bytes of the packet and blind is the
+        Base64 encoded blind used for the next nonce. The last packet needs no
+        blind.
       </t>
       <t>
         A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt;
@@ -868,6 +869,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <t hangText="ASCII ">American Standard Code for Information
               Interchange</t>
           <t hangText="IANA  ">Internet Assigned Numbers Authority</t>
+          <t hangText="JSON  "><xref target="RFC8259">JavaScript Object
+              Notation</xref></t>
           <t hangText="MJD   ">Modified Julian Date</t>
           <t hangText="NTP   "><xref target="RFC5905">Network Time Protocol
               </xref></t>
