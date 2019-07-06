@@ -283,10 +283,11 @@
             A timestamp is a uint64 interpreted in the following way. The most
             significant 3 bytes contain the integer part of a Modified Julian
             Date (MJD). The least significant 5 bytes is a count of the number
-            of microseconds since midnight on that day.
+            of Coordinated Universal Time (UTC) microseconds
+            <xref target="ITU-R_TF.460-6"/> since midnight on that day.
           </t>
           <t>
-            The MJD is the number of days since 17 November 1858
+            The MJD is the number of UTC days since 17 November 1858
             <xref target="ITU-T_TF.457-2"/>.
           </t>
           <t>
@@ -810,6 +811,21 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         </front>
       </reference>
 
+      <reference anchor="ITU-R_TF.460-6">
+        <front>
+          <title>
+            Standard-Frequency and Time-Signal Emissions
+          </title>
+          <author>
+            <organization>
+              ITU-R
+            </organization>
+          </author>
+          <date year="2002" month="February"/>
+        </front>
+        <seriesInfo name="ITU-R Recommendation" value="TF.460-6"/>
+      </reference>
+
       <reference anchor="ITU-T_TF.457-2">
         <front>
           <title>
@@ -859,6 +875,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               Network Time Security</xref></t>
           <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
               </xref></t>
+          <t hangText="UTC   "><xref target="ITU-R_TF.460-6">Coordinated
+              Universal Time</xref></t>
         </list>
       </t>
     </section>
