@@ -65,7 +65,7 @@
   </front>
 
   <middle>
-    <section title="Motivation">
+    <section title="Introduction">
       <t>
         Time synchronization is essential to Internet security as many security
         protocols and other applications require synchronization
