@@ -501,7 +501,7 @@
               <xref target="root-check"/>.
             </t>
             <t>
-              The signature of SREP in SIG\x00 validates with the public key in
+              The signature of SREP in SIG validates with the public key in
               DELE.
             </t>
           </list>
