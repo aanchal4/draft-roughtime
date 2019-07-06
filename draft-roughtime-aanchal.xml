@@ -770,47 +770,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
 
   <back>
     <references title="Normative References">
-      <?rfc include="reference.RFC.0020.xml"?>
-      <?rfc include="reference.RFC.4648.xml"?>
-      <?rfc include='reference.RFC.6335.xml'?>
-      <?rfc include="reference.RFC.8032.xml"?>
-      <?rfc include="reference.RFC.8259.xml"?>
-    </references>
-    <references title="Informative References">
-      <?rfc include="reference.RFC.0768.xml"?>
-      <?rfc include="reference.RFC.2119.xml"?>
-      <?rfc include="reference.RFC.5905.xml"?>
-      <?rfc include="reference.RFC.6234.xml"?>
-      <?rfc include="reference.RFC.7384.xml"?>
-      <?rfc include="reference.RFC.8174.xml"?>
-      <?rfc include="reference.RFC.8573.xml"?>
-      <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
-
-      <reference anchor="Autokey"
-          target="https://zero-entropy.de/autokey_analysis.pdf">
-        <front>
-          <title>Analysis of the NTP Autokey Procedures</title>
-          <author initials="S." surname="Rottger">
-            <organization/>
-          </author>
-          <date year="2012"/>
-        </front>
-      </reference>
-
-      <reference anchor="DelayAttacks"
-          target="https://ieeexplore.ieee.org/document/6336612">
-        <front>
-          <title>
-            A Game Theoretic Analysis of Delay Attacks Against Time
-            Synchronization Protocols
-          </title>
-          <author initials="T." surname="Mizrahi" fullname="Tal Mizrahi">
-            <organization/>
-          </author>
-          <date year="2012"/>
-        </front>
-      </reference>
-
       <reference anchor="ITU-R_TF.460-6">
         <front>
           <title>
@@ -840,6 +799,47 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <date year="1997" month="October"/>
         </front>
         <seriesInfo name="ITU-T Recommendation" value="TF.457-2"/>
+      </reference>
+
+      <?rfc include="reference.RFC.0020.xml"?>
+      <?rfc include="reference.RFC.4648.xml"?>
+      <?rfc include="reference.RFC.6234.xml"?>
+      <?rfc include='reference.RFC.6335.xml'?>
+      <?rfc include="reference.RFC.8032.xml"?>
+      <?rfc include="reference.RFC.8259.xml"?>
+    </references>
+    <references title="Informative References">
+      <?rfc include="reference.RFC.0768.xml"?>
+      <?rfc include="reference.RFC.2119.xml"?>
+      <?rfc include="reference.RFC.5905.xml"?>
+      <?rfc include="reference.RFC.7384.xml"?>
+      <?rfc include="reference.RFC.8174.xml"?>
+      <?rfc include="reference.RFC.8573.xml"?>
+      <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
+
+      <reference anchor="Autokey"
+          target="https://zero-entropy.de/autokey_analysis.pdf">
+        <front>
+          <title>Analysis of the NTP Autokey Procedures</title>
+          <author initials="S." surname="Rottger">
+            <organization/>
+          </author>
+          <date year="2012"/>
+        </front>
+      </reference>
+
+      <reference anchor="DelayAttacks"
+          target="https://ieeexplore.ieee.org/document/6336612">
+        <front>
+          <title>
+            A Game Theoretic Analysis of Delay Attacks Against Time
+            Synchronization Protocols
+          </title>
+          <author initials="T." surname="Mizrahi" fullname="Tal Mizrahi">
+            <organization/>
+          </author>
+          <date year="2012"/>
+        </front>
       </reference>
 
       <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
