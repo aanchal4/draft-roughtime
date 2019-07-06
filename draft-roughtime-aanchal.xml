@@ -841,6 +841,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           </author>
           <date year="2012"/>
         </front>
+        <seriesInfo name="DOI" value="10.1109/ISPCS.2012.6336612"/>
       </reference>
 
       <reference anchor="MCBG" target="https://eprint.iacr.org/2015/1020">
