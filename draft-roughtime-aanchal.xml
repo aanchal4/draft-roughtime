@@ -143,7 +143,7 @@
         Roughtime is a protocol for rough time synchronization that enables
         clients to provide cryptographic proof of server malfeasance. It does so
         by having responses from servers include a signature with a certificate
-        rooted in a long term public/private key pair over a value derived from
+        rooted in a long-term public/private key pair over a value derived from
         a nonce provided by the client in its request. This provides
         cryptographic proof that the timestamp was issued after the server
         received the client's request. The derived value included in the
@@ -384,14 +384,14 @@
         </t>
         <t>
           The CERT tag contains a public-key certificate signed with the
-          server's long term key. Its value is a Roughtime message with the tags
+          server's long-term key. Its value is a Roughtime message with the tags
           DELE and SIG, where SIG is a signature over the DELE value.
         </t>
         <t>
           The DELE tag contains a delegated public-key certificate used by the
           server to sign the SREP tag. Its value is a Roughtime message with the
           tags MINT, MAXT, and PUBK. The purpose of the DELE tag is to enable
-          separation of a long term public key from keys on devices exposed to
+          separation of a long-term public key from keys on devices exposed to
           the public Internet.
         </t>
         <t>
@@ -483,7 +483,7 @@
       <section title="Validity of response">
         <t>
           A client MUST check the following properties when it receives a
-          response. We assume the long term server public key is known to the
+          response. We assume the long-term server public key is known to the
           client through other means.
 
           <list style="symbols">
@@ -563,19 +563,19 @@
           <artwork>
 address:       roughtime.cloudflare.com
 port:          2002
-long term key: gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=
+long-term key: gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=
 
 address:       roughtime.int08h.com
 port:          2002
-long term key: AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=
+long-term key: AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=
 
 address:       roughtime.sandbox.google.com
 port:          2002
-long term key: etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=
+long-term key: etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=
 
 address:       roughtime.se
 port:          2002
-long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
+long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           </artwork>
         </figure>
       </t>
@@ -759,7 +759,7 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     <section title="Privacy Considerations">
       <t>
         This protocol is designed to obscure all client identifiers. Servers
-        necessarily have persistent long term identities essential to enforcing
+        necessarily have persistent long-term identities essential to enforcing
         correct behavior. Generating nonces from previous responses without
         using a blind can enable tracking of clients as they move between
         networks.
