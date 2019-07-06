@@ -115,8 +115,8 @@
             A Roughtime client can roughly detect (with no absolute guarantee) a
             delay attack <xref target="DelayAttacks"/> but can not
             cryptographically prove this to a third party. However, the absence
-            of proof of malfeasance SHOULD not be considered a proof of absence
-            of malfeasance. So Roughtime SHOULD not be used as a witness that a
+            of proof of malfeasance should not be considered a proof of absence
+            of malfeasance. So Roughtime should not be used as a witness that a
             server is overall "good".
           </t>
           <t>
