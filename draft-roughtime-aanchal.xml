@@ -637,12 +637,11 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           the following fields:
           <list>
             <t>
-              Tag Value (REQUIRED): A 32-bit unsigned integer in hexadecimal
-              format.
+              Tag (REQUIRED): A 32-bit unsigned integer in hexadecimal format.
             </t>
             <t>
               ASCII Representation (OPTIONAL): The ASCII representation of the
-              tag value in accordance with <xref target="tag"/> of this memo, if
+              tag in accordance with <xref target="tag"/> of this memo, if
               applicable.
             </t>
             <t>
@@ -657,7 +656,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           The initial contents of this registry SHALL be as follows:
         </t>
         <texttable>
-          <ttcol>Tag Value</ttcol>
+          <ttcol>Tag</ttcol>
           <ttcol>ASCII Representation</ttcol>
           <ttcol>Reference</ttcol>
 
