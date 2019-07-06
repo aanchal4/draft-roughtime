@@ -148,9 +148,9 @@
         cryptographic proof that the timestamp was issued after the server
         received the client's request. The derived value included in the
         server's response is the root of a Merkle tree which includes the hash
-        of the client's nonce as one of its leaves. This enables the server to
-        amortize the relatively costly signing operation over a number of client
-        requests.
+        of the client's nonce as the value of one of its leaf nodes. This
+        enables the server to amortize the relatively costly signing operation
+        over a number of client requests.
       </t>
       <t>
         Single server mode: At its most basic level, Roughtime is a one round
@@ -200,8 +200,8 @@
 
     <section title="The guarantee">
       <t>
-        A Roughtime response to a query sent at t_1, received at t_2, and with
-        timestamp t_3 is guaranteed to have been created between the
+        A Roughtime server guarantees that a response to a query sent at t_1,
+        received at t_2, and with timestamp t_3 has been created between the
         transmission of the query and its reception. If t_3 is not within that
         interval, a server inconsistency may be detected and used to impeach the
         server. The use of such a guarantee in synchronization is currently
@@ -334,10 +334,10 @@
         <t>
           A request is a Roughtime message with the tag NONC. The size of the
           request message SHOULD be at least 1024 bytes. To attain this size the
-          PAD tag SHOULD be added to the message. Other tags SHOULD be ignored
-          by the server. Responding to requests shorter than 1024 bytes is
-          OPTIONAL and servers MUST NOT send responses larger than the requests
-          they are replying to.
+          PAD tag SHOULD be added to the message. Tags other than NONC SHOULD be
+          ignored by the server. Responding to requests shorter than 1024 bytes
+          is OPTIONAL and servers MUST NOT send responses larger than the
+          requests they are replying to.
         </t>
         <t>
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
@@ -347,7 +347,7 @@
         </t>
         <t>
           The PAD tag SHOULD be used by clients to ensure their request messages
-          are at least 1024 bytes in size. Their value SHOULD be all zeros.
+          are at least 1024 bytes in size. Its value SHOULD be all zeros.
         </t>
       </section>
 
@@ -416,9 +416,9 @@
         <t>
           The PATH tag value is a multiple of 32 bytes long and represents a
           path of 32 byte hash values in the Merkle tree used to generate the
-          ROOT value as described in <xref target="merkle-tree"/>. In the
-          special case where a response is made for a single request and the
-          Merkle tree contains only the root node, the size of PATH is zero.
+          ROOT value as described in <xref target="merkle-tree"/>. In the case
+          where a response is prepared for a single request and the Merkle tree
+          contains only the root node, the size of PATH is zero.
         </t>
       </section>
 
@@ -429,9 +429,9 @@
           thus dependent on all leaf nodes.
         </t>
         <t>
-          In Roughtime, each leaf node in the tree represents the nonce of one
-          request that a response message is sent in reply to. Leaf nodes are
-          indexed left to right, beginning with zero.
+          In Roughtime, each leaf node in the Merkle tree represents the nonce
+          of one request that a response message is sent in reply to. Leaf nodes
+          are indexed left to right, beginning with zero.
         </t>
         <t>
           The values of all nodes are calculated from the leaf nodes and up
@@ -452,7 +452,8 @@
         <t>
           The values of all sibling nodes in the path between a request's nonce
           node and the root node is stored in the PATH tag so that the client
-          can reconstruct the value in the ROOT tag using its nonce.
+          can reconstruct and validate the value in the ROOT tag using its
+          nonce.
         </t>
 
         <section title="Root value validity check algorithm"
@@ -506,8 +507,8 @@
 
           A response that passes these checks is said to be valid. Validity of a
           response does not prove the time is correct, but merely that the
-          server signed it, and more specifically began to compute the signature
-          at a time in the interval (MIDP-RADI, MIDP+RADI).
+          server signed it, and thus guarantees that it began to compute the
+          signature at a time in the interval (MIDP-RADI, MIDP+RADI).
         </t>
       </section>
     </section>
@@ -726,9 +727,9 @@ long term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       </t>
       <t>
         Maintaining a list of trusted servers and adjudicating violations of the
-        rules by servers are not discussed in this document and are essential
-        for security. Roughtime clients MUST update their view of which servers
-        are trustworthy in order to benefit from the detection of misbehavior.
+        rules by servers is not discussed in this document and is essential for
+        security. Roughtime clients MUST update their view of which servers are
+        trustworthy in order to benefit from the detection of misbehavior.
       </t>
       <t>
         Validating timestamps made on different dates requires knowledge of leap
