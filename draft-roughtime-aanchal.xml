@@ -164,10 +164,10 @@
       <t>
         The server proves freshness of its response as follows: The client's
         request contains a nonce. The server incorporates the nonce into its
-        signed response so that the client can verify that the response was
-        created after the nonce. Provided that the nonce has sufficient entropy,
-        this proves that the signed response could only have been generated
-        after the nonce.
+        signed response so that the client can verify the server's signatures
+        covering the nonce issued by the client. Provided that the nonce has
+        sufficient entropy, this proves that the signed response could only have
+        been generated after the nonce.
       </t>
       <t>
         Chaining multiple servers: For subsequent requests, the client generates
@@ -342,9 +342,10 @@
         </t>
         <t>
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
-          by the client either at random or by hashing a previous Roughtime
-          response message together with a blind as described in
-          <xref target="cheater-detection"/>.
+          by hashing a previous Roughtime response message together with a blind
+          as described in <xref target="cheater-detection"/>. If no previous
+          responses are avaiable to the client, the nonce SHOULD be generated at
+          random.
         </t>
         <t>
           The PAD tag SHOULD be used by clients to ensure their request messages
