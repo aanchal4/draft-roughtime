@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-roughtime-aanchal-02" ipr="trust200902">
+<rfc category="info" docName="draft-roughtime-aanchal-03" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -45,7 +45,7 @@
       </address>
     </author>
 
-    <date year="2019" month="May" day="27"/>
+    <date year="2019" month="July" day="8"/>
 
     <area>General</area>
 
@@ -123,6 +123,19 @@
             Note that delay attacks cannot be detected/stopped by any protocol.
             Delay attacks can not, however, undermine the security guarantees
             provided by Roughtime.
+          </t>
+          <t>
+            Although delay attacks cannot be prevented, they can be limited to
+            a predetermined upper bound. This can be done by defining a
+            maximal tolerable Round Trip Time (RTT) value, MAX-RTT, that a
+            Roughtime client is willing to accept. A Roughtime client can
+            measure the RTT of every request-response handshake and compare it
+            to MAX-RTT. If the RTT exceeds MAX-RTT, the corresponding server
+            is assumed to be a falseticker. When this approach is used the
+            maximal time error that can be caused by a delay attack is
+            MAX-RTT/2. It should be noted that this approach assumes that the
+            nature of the system is known to the client, including reasonable
+            upper bounds on the RTT value.
           </t>
         </list>
       </t>
