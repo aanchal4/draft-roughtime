@@ -213,12 +213,15 @@
 
     <section title="The guarantee">
       <t>
-        A Roughtime server guarantees that a response to a query sent at t_1,
-        received at t_2, and with timestamp t_3 has been created between the
-        transmission of the query and its reception. If t_3 is not within that
-        interval, a server inconsistency may be detected and used to impeach the
-        server. The use of such a guarantee in synchronization is currently
-        beyond the grasp of this document.
+        A Roughtime server guarantees that a response to a query sent
+        at t_1, received at t_2, and with timestamp t_3 has been
+        created between the transmission of the query and its
+        reception. If t_3 is not within that interval, a server
+        inconsistency may be detected and used to impeach the
+        server. The propagation of such a guarantee and its use of
+        type synchronization is discussed in <xref target="ntp-integration"/>. No delay attacker may affect this:
+        they may only expand the interval between t_1 and t_2, or of
+        course stop the measurement in the first place.
       </t>
     </section>
 
@@ -527,7 +530,28 @@
         </t>
       </section>
     </section>
+    <section title = "Integration into ntp" anchor="ntp-integration">
+      <t>
+        We assume that there is a bound PHI on the frequency error in
+        the clock on the machine. Given a measurement taken at a local
+        time t1, we know the true time is in [ t1-delta-sigma,
+        t1-delta+sigma ]. After d seconds have elapsed we know the true
+        time is within [ t1-delta-sigma-d*PHI, t1-delta+sigma+d*PHI]. A
+        simple and effective way to mix with NTP or PTP discipline of
+        the clock is to trim the observed intervals in NTP to fit
+        entirely within this window or reject measurements that fall
+        to far outside. This assumes time has not been stepped.  If
+        the NTP process decides to step the time, it MUST use
+        roughtime to ensure the new truetime estimate that will be
+        stepped to is consistent with the true time.</t>
 
+        <t>Should this window become too large, another roughtime
+        measurement is called for. The definition of "too large" is
+        purposfully left vauge.</t>
+
+        <t>Implementations MAY use other, more sophisticated means of
+        adjusting the clock respecting roughtime information.</t>
+    </section>
     <section title="Cheater Detection" anchor="cheater-detection">
       <t>
         A chain of responses is a series of responses where the SHA-512 hash of
