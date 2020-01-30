@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-roughtime-aanchal-03" ipr="trust200902">
+<rfc category="info" docName="draft-aanchal-roughtime-04" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -41,16 +41,16 @@
           <region></region>
           <country>USA</country>
         </postal>
-        <email>watson@cloudflare.com</email>
+        <email>watsonbladd@gmail.com</email>
       </address>
     </author>
 
-    <date year="2019" month="July" day="8"/>
+    <date year="2020" month="January" day="20"/>
 
     <area>General</area>
 
     <workgroup>Internet Engineering Task Force</workgroup>
-
+    
     <keyword>roughtime</keyword>
 
     <keyword>time synchronization</keyword>
@@ -341,7 +341,9 @@
 
     <section title="Protocol">
       <t>
-        Roughtime messages are sent between clients and servers as UDP packets.
+        Roughtime messages are sent between clients and servers as UDP packets, or
+	over TCP. When transporting over TCP, the packets are prefixed with their
+	length as a uint32. Currently no servers exist for the TCP version.
         As described in <xref target="protocol-overview"/>, clients initiate
         time synchronization by sending request packets containing a nonce to
         servers who send signed time responses in return.
@@ -489,11 +491,11 @@
           </t>
           <t>
             If the current bit is 0, one hashes 0x01, the current hash, and the
-            value from PATH.
+            value from PATH to derive the next current value.
           </t>
           <t>
             If the current bit is 1 one hashes 0x01, the value from PATH, and
-            the current hash.
+            the current hash to derive the next current value.
           </t>
         </section>
       </section>
@@ -547,7 +549,7 @@
 
         <t>Should this window become too large, another roughtime
         measurement is called for. The definition of "too large" is
-        purposfully left vauge.</t>
+        implementation defined.</t>
 
         <t>Implementations MAY use other, more sophisticated means of
         adjusting the clock respecting roughtime information.</t>
