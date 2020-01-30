@@ -659,7 +659,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           Port Number Registry</xref>:
           <list>
             <t>Service Name: Roughtime</t>
-            <t>Transport Protocol: udp</t>
+            <t>Transport Protocol: tcp,udp</t>
             <t>Assignee: IESG &lt;iesg@ietf.org&gt;</t>
             <t>Contact: IETF Chair &lt;chair@ietf.org&gt;</t>
             <t>Description: Roughtime time synchronization</t>
