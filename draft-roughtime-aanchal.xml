@@ -530,7 +530,7 @@
         </t>
       </section>
     </section>
-    <section title = "Integration into ntp" anchor="ntp-integration">
+    <section title = "Integration into NTP" anchor="ntp-integration">
       <t>
         We assume that there is a bound PHI on the frequency error in
         the clock on the machine. Given a measurement taken at a local
