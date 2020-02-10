@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-aanchal-roughtime-04" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-00" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -30,6 +30,10 @@
 
     <author fullname="Adam Langley" initials="A." surname="Langley">
       <organization>Google </organization>
+      <address>
+	<email>
+	agl@google.com </email>
+      </address>
     </author>
 
     <author fullname="Watson Ladd" initials="W." surname="Ladd">
@@ -45,7 +49,7 @@
       </address>
     </author>
 
-    <date year="2020" month="January" day="20"/>
+    <date year="2020" month="January" day="27"/>
 
     <area>General</area>
 
