@@ -905,6 +905,19 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <date year="2015"/>
         </front>
       </reference>
+      <reference anchor="ccdate" target="https://doi.org/10.1017/9781107415058">
+	<front>
+	  <title> Calendrical Calculations: The Ultimate Edition</title>
+	  <author initials = "E." surname="Reingold" fullname="E. Reingold">
+	    <organization/>
+	  </author>
+	  <author initials = "N." surname="Derschowitz" fullname="N. Dershowitz">
+	    <organization/>
+	  </author>
+	  <date year="2018"/>
+	  </front>
+	</reference>
+	  
     </references>
 
     <section title="Terms and Abbreviations">
@@ -926,6 +939,21 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               Universal Time</xref></t>
         </list>
       </t>
+    </section>
+    <section title= "On the conversion of Unix timestamps to MJD+microseconds">
+      <t> This section discusses the conversion of a Unix timestamp, that is the number of UTC seconds since 0000 UTC 1 Jan 1970 ignoring
+      leap seconds, to the Modified Julian Date+microseconds since midnight representation. Note that this transform also requires knowing if the current second is in a leap second or not. This is information obtainable through NTP or operating system interfaces on many, but not all, operating systems.</t>
+      <t>Let sU, mU, denote the seconds and milliseconds in Unix Time. We begin by computing the Modified Julian Date. 17 November 1858 is Julian date 0. Therefore the Modified Julian Date is ((sU+315964800)/(24*60*60)) rounded down. The remaining seconds are
+      multiplied by 10e6, and added to the number of milliseconds times 10e3. Then if it is currently a leapsecond we add 1e6, to
+      obtain the number of microseconds since midnight.
+      </t>
+    </section>
+    <section title="On the computation of MJD-microseconds from NMEA sentences">
+      <t> This section assumes alignment of NMEA sentences with
+      PPS. The ZDA sentence contains the hour, minutes, seconds,
+      day, month, and year for UTC. Conversion of this to modified
+      Julian date plus microseconds since last midnight is
+      straightfoward, and discussed in <xref target ="ccdate"/></t>
     </section>
   </back>
 </rfc>
