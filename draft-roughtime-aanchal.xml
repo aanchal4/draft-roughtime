@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-roughtime-aanchal-03" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-00" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -30,6 +30,10 @@
 
     <author fullname="Adam Langley" initials="A." surname="Langley">
       <organization>Google </organization>
+      <address>
+	<email>
+	agl@google.com </email>
+      </address>
     </author>
 
     <author fullname="Watson Ladd" initials="W." surname="Ladd">
@@ -41,16 +45,16 @@
           <region></region>
           <country>USA</country>
         </postal>
-        <email>watson@cloudflare.com</email>
+        <email>watsonbladd@gmail.com</email>
       </address>
     </author>
 
-    <date year="2019" month="July" day="8"/>
+    <date year="2020" month="January" day="27"/>
 
     <area>General</area>
 
     <workgroup>Internet Engineering Task Force</workgroup>
-
+    
     <keyword>roughtime</keyword>
 
     <keyword>time synchronization</keyword>
@@ -341,7 +345,9 @@
 
     <section title="Protocol">
       <t>
-        Roughtime messages are sent between clients and servers as UDP packets.
+        Roughtime messages are sent between clients and servers as UDP packets, or
+	over TCP. When transporting over TCP, the packets are prefixed with their
+	length as a uint32. Currently no servers exist for the TCP version.
         As described in <xref target="protocol-overview"/>, clients initiate
         time synchronization by sending request packets containing a nonce to
         servers who send signed time responses in return.
@@ -489,11 +495,11 @@
           </t>
           <t>
             If the current bit is 0, one hashes 0x01, the current hash, and the
-            value from PATH.
+            value from PATH to derive the next current value.
           </t>
           <t>
             If the current bit is 1 one hashes 0x01, the value from PATH, and
-            the current hash.
+            the current hash to derive the next current value.
           </t>
         </section>
       </section>
@@ -530,7 +536,7 @@
         </t>
       </section>
     </section>
-    <section title = "Integration into ntp" anchor="ntp-integration">
+    <section title = "Integration into NTP" anchor="ntp-integration">
       <t>
         We assume that there is a bound PHI on the frequency error in
         the clock on the machine. Given a measurement taken at a local
@@ -547,7 +553,7 @@
 
         <t>Should this window become too large, another roughtime
         measurement is called for. The definition of "too large" is
-        purposfully left vauge.</t>
+        implementation defined.</t>
 
         <t>Implementations MAY use other, more sophisticated means of
         adjusting the clock respecting roughtime information.</t>
@@ -657,7 +663,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           Port Number Registry</xref>:
           <list>
             <t>Service Name: Roughtime</t>
-            <t>Transport Protocol: udp</t>
+            <t>Transport Protocol: tcp,udp</t>
             <t>Assignee: IESG &lt;iesg@ietf.org&gt;</t>
             <t>Contact: IETF Chair &lt;chair@ietf.org&gt;</t>
             <t>Description: Roughtime time synchronization</t>
@@ -848,6 +854,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     </references>
     <references title="Informative References">
       <?rfc include="reference.RFC.0768.xml"?>
+      <?rfc include="reference.RFC.0793.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.7384.xml"?>
@@ -914,6 +921,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               </xref></t>
           <t hangText="NTS   "><xref target="I-D.ietf-ntp-using-nts-for-ntp">
               Network Time Security</xref></t>
+          <t hangText="TCP   "><xref target="RFC0793">Transmission Control
+              Protocol</xref></t>
           <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
               </xref></t>
           <t hangText="UTC   "><xref target="ITU-R_TF.460-6">Coordinated
