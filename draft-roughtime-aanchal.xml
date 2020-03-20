@@ -271,7 +271,14 @@
         </artwork>
       </figure>
 
-      <section title="Data Types">
+      <section title="Data Types" anchor="format">
+        <section title="int32">
+          <t>
+            An int32 is a 32 bit signed integer. It is serialized in sign-magitude representation
+            with the sign bit in the most significant bit. It is serialized least significant byte first.
+            The negative zero value (0x80000000) MUST NOT be used.
+          </t>
+        </section>
         <section title="uint32">
           <t>
             A uint32 is a 32 bit unsigned integer. It is serialized with the
@@ -288,7 +295,7 @@
 
         <section title="Tag" anchor="tag">
           <t>
-            Tags are used to identify values in Roughtime packets. A tag is a
+            Tags are used to identify values in Roughtime messages. A tag is a
             uint32 but may also be listed as a sequence of up to four ASCII
             characters <xref target="RFC0020"/>. ASCII strings shorter than four
             characters can be unambiguously converted to tags by padding them
@@ -333,7 +340,7 @@
           offset array is considered to have a not explicitly encoded value of 0
           as its zeroth entry. The value associated with the ith tag begins at
           offset[i] and ends at offset[i+1]-1, with the exception of the last
-          value which ends at the end of the packet. Values may have zero
+          value which ends at the end of the message. Values may have zero
           length.
         </t>
         <t>
@@ -345,22 +352,76 @@
 
     <section title="Protocol">
       <t>
-        Roughtime messages are sent between clients and servers as UDP packets, or
-	over TCP. When transporting over TCP, the packets are prefixed with their
-	length as a uint32. Currently no servers exist for the TCP version.
-        As described in <xref target="protocol-overview"/>, clients initiate
-        time synchronization by sending request packets containing a nonce to
-        servers who send signed time responses in return.
+         As described in <xref target="protocol-overview"/>, clients
+         initiate time synchronization by sending requests containing
+         a nonce to servers who send signed time responses in
+         return. Roughtime packets can be sent between clients and
+         servers either as UDP datagrams or via TCP streams. Servers
+         SHOULD support the UDP transport mode, while TCP transport is
+         OPTIONAL.
+         
+         A Roughtime packet MUST be formatted according to
+         <xref target="fig-roughtime-packet-format" /> and as described here.
+         The first field is a uint64 with the value 0x4d49544847554f52
+         ("ROUGHTIM" in ASCII). The second field is a uint32 and contains the
+         length of the third field. The third and last field contains a
+         Roughtime message as specified in <xref target="format"/>.
+
+         <figure anchor="fig-roughtime-packet-format"
+           title="Roughtime Packet Format">
+           <artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  0x4d49544847554f52 (uint32)                  |
+|                        ("ROUGHTIM")                           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Message length (uint32)                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+.                                                               .
+.                      Roughtime message                        .
+.                                                               .
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]>
+           </artwork>
+         </figure>
+
+         Roughtime request and response packets MUST be transmitted in a single
+         datagram when the UDP transport mode is used. Setting the packet's don't
+         fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4 networks.
+         
+         Multiple requests and responses can be exchanged over an established TCP
+         connection. Clients MAY send multiple requests at once and servers MAY
+         send responses out of order. The connection SHOULD be closed by the
+         client when it has no more requests to send and has received all
+         expected responses. Either side SHOULD close the connection in response
+         to synchronization, format, implementation-defined timeouts, or other
+         errors.
+
+         All requests and responses MUST contain the VER tag. It contains a list
+         of one or more uint32 version numbers. The version of Roughtime
+         specified by this memo has version number 1.
+
+         For testing drafts of this memo, a version number of 0x80000000 plus the
+         draft number is used.
       </t>
 
       <section title="Requests">
         <t>
-          A request is a Roughtime message with the tag NONC. The size of the
-          request message SHOULD be at least 1024 bytes. To attain this size the
-          PAD tag SHOULD be added to the message. Tags other than NONC SHOULD be
-          ignored by the server. Responding to requests shorter than 1024 bytes
-          is OPTIONAL and servers MUST NOT send responses larger than the
-          requests they are replying to.
+          A request is a Roughtime message with the tags NONC and VER. Over a
+          UDP connection the size of the request message SHOULD be at
+          least 1024 bytes. To attain this size the PAD tag SHOULD be
+          added to the message.  Tags other than NONC and VER SHOULD be
+          ignored by the server. Responding to requests shorter than
+          1024 bytes is OPTIONAL and servers MUST NOT send responses
+          larger than the requests they are replying to.
+        </t>
+        <t> In a request, the VER tag contains a list of versions. The
+        VER tag MUST include at least one Roughtime version supported
+        by the client. The client MUST ensure that the version numbers
+        and tags included in the request are not incompatible with
+        each other or the package contents.
         </t>
         <t>
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
@@ -377,14 +438,17 @@
 
       <section title="Responses">
         <t>
-          A response contains the tags SREP, SIG, CERT, INDX, and PATH. The SIG
+          A response MUST contain the tags SREP, SIG, CERT, INDX, PATH and VER. The SIG
           tag is a signature over the SREP value using the public key contained
           in CERT, as explained below.
         </t>
         <t>
-          The SREP tag contains a time response. Its value is a Roughtime
-          message with the tags ROOT, MIDP, and RADI.
+          The SREP tag contains a time response. Its value is a
+          Roughtime message with the tags ROOT, MIDP, and RADI, and
+          NONC. The server MAY include any of the tags DUT1, DTAI and
+          LEAP in the contents of the SREP tag.
         </t>
+        <t> NONC contains the nonce of the message being responded to. </t>
         <t>
           The ROOT tag contains a 32 byte value of a Merkle tree root as
           described in <xref target="merkle-tree"/>.
@@ -396,8 +460,31 @@
           The RADI tag value is a uint32 representing the server's estimate of
           the accuracy of MIDP in microseconds. Servers MUST ensure that the
           true time is within (MIDP-RADI, MIDP+RADI) at the time they compose
-          the response packet.
+          the response message.
         </t>
+        <t>
+          The DUT1 tag value is an int32 indicating the predicted difference
+          between UT1 and UTC (UT1 - UTC) in milliseconds as given by the
+          International Earth Rotation and Reference Systems Service (IERS).
+        </t>
+        <t>
+          The DTAI tag value is an int32 indicating the current difference between
+          International Atomic Time (TAI) and UTC (TAI - UTC) in milliseconds as
+          published in the International Bureau of Weights and Measures' (BIPM)
+          Circular T.
+        </t>
+        <t>
+          The LEAP tag contains zero or more int32 values. Each value represents
+          the MJD of a past or future leap second event. Positive values represent
+          the addition of a second at the indicated date and negative values
+          represent the removal of a second at the indicated (negative) date. The
+          first item in the list MUST be the last (past or future) leap second
+          event that the server knows about. The leap second events MUST be sorted
+          in reverse chronological order. A leap tag with zero int32 values
+          indicates that the server does not hold any updated leap second
+          information.
+        </t>
+       
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
           <xref target="RFC8032"/> over a signature context concatenated with
@@ -648,9 +735,10 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
 
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
-        Thomas Peterson corrected multiple nits. Marcus Dansarie, Peter
-        L&ouml;thberg (Lothberg), Tal Mizrahi, Ragnar Sundblad, Kristof
-        Teichel, and the other members of the NTP working group contributed
+        Marcus Dansarie contributed many fruitful ideas. Thomas
+        Peterson corrected multiple nits. Peter L&ouml;thberg
+        (Lothberg), Tal Mizrahi, Ragnar Sundblad, Kristof Teichel, and
+        the other members of the NTP working group contributed
         comments and suggestions.
       </t>
     </section>
@@ -672,6 +760,26 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               range</t>
           </list>
         </t>
+      </section>
+      <section title="Roughtime Version Registry">
+        <t> IANA is requested to create a new registry entitled
+        &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
+        <list>
+          <t> Version: a 32-bit unsigned integer </t>
+          <t> Reference: the description of the version </t>
+        </list>
+        The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
+        set are reserved.
+        </t>
+        <t>
+          The initial contents of this registry shall be as follows:
+        </t>
+        <texttable>
+          <ttcol>Version</ttcol>
+          <ttcol>Reference</ttcol>
+          <c>1</c>
+          <c>[[this memo]]</c>
+        </texttable>
       </section>
 
       <section title="Roughtime Tag Registry">
@@ -712,6 +820,14 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>SIG</c>
           <c>[[this memo]]</c>
 
+          <c>0x00524556</c>
+          <c>VER</c>
+          <c>[[this memo]]</c>
+
+          <c>0x31545544</c>
+          <c>DUT1</c>
+          <c>[[this memo]]</c>
+
           <c>0x434e4f48</c>
           <c>NONC</c>
           <c>[[this memo]]</c>
@@ -724,12 +840,20 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>PATH</c>
           <c>[[this memo]]</c>
 
+          <c>0x49415444</c>
+          <c>DTAI</c>
+          <c>[[this memo]]</c>
+
           <c>0x49444152</c>
           <c>RADI</c>
           <c>[[this memo]]</c>
 
           <c>0x4b425550</c>
           <c>PUBK</c>
+          <c>[[this memo]]</c>
+
+          <c>0x5041454c</c>
+          <c>LEAP</c>
           <c>[[this memo]]</c>
 
           <c>0x5044494d</c>
@@ -759,7 +883,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>0x58444e49</c>
           <c>INDX</c>
           <c>[[this memo]]</c>
-
         </texttable>
       </section>
     </section>
@@ -854,13 +977,14 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     </references>
     <references title="Informative References">
       <?rfc include="reference.RFC.0768.xml"?>
+      <?rfc include='reference.RFC.0791.xml'?>
       <?rfc include="reference.RFC.0793.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
-      <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
+      <?rfc include="reference.I-D.draft-ietf-ntp-using-nts-for-ntp-25.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
@@ -921,9 +1045,13 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               </xref></t>
           <t hangText="NTS   "><xref target="I-D.ietf-ntp-using-nts-for-ntp">
               Network Time Security</xref></t>
+          <t hangText="TAI   "><xref target="ITU-R_TF.460-6">International
+              Atomic Time (Temps Atomique International)</xref></t>
           <t hangText="TCP   "><xref target="RFC0793">Transmission Control
               Protocol</xref></t>
           <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
+              </xref></t>
+          <t hangText="UT    "><xref target="ITU-R_TF.460-6">Universal Time
               </xref></t>
           <t hangText="UTC   "><xref target="ITU-R_TF.460-6">Coordinated
               Universal Time</xref></t>
