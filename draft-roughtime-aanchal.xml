@@ -278,6 +278,7 @@
             with the sign bit in the most significant bit. It is serialized least significant byte first.
             The negative zero value (0x80000000) MUST NOT be used.
           </t>
+        </section>
         <section title="uint32">
           <t>
             A uint32 is a 32 bit unsigned integer. It is serialized with the
@@ -351,21 +352,44 @@
 
     <section title="Protocol">
       <t>
-         As described in Section 3, clients initiate time synchronization by
-         sending requests containing a nonce to servers who send signed time
-         responses in return. Roughtime packets can be sent between clients and
-         servers either as UDP datagrams or via TCP streams. Servers SHOULD
-         support the UDP transport mode, while TCP transport is OPTIONAL.
+         As described in <xref target="protocol-overview" />, clients initiate
+         time synchronization by sending requests containing a nonce to servers
+         who send signed time responses in return. Roughtime packets can be
+         sent between clients and servers either as UDP datagrams or via TCP
+         streams. Servers SHOULD support the UDP transport mode, while TCP
+         transport is OPTIONAL.
          
-         A Roughtime packet MUST be formatted according to TODO FIGURE and as
-         described here. The first field is a uint64 with the value
-         0x4d49544847554f52 ("ROUGHTIM" in ASCII). The second field is a uint32
-         and contains the length of the third field. The third and last field
-         contains a Roughtime message as specified in <xref target="format"/>.
+         A Roughtime packet MUST be formatted according to
+         <xref target="fig-roughtime-packet-format" /> and as described here.
+         The first field is a uint64 with the value 0x4d49544847554f52
+         ("ROUGHTIM" in ASCII). The second field is a uint32 and contains the
+         length of the third field. The third and last field contains a
+         Roughtime message as specified in <xref target="format"/>.
+
+         <figure anchor="fig-roughtime-packet-format"
+           title="Roughtime Packet Format">
+           <artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  0x4d49544847554f52 (uint32)                  |
+|                        ("ROUGHTIM")                           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Message length (uint32)                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+.                                                               .
+.                      Roughtime message                        .
+.                                                               .
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]>
+           </artwork>
+         </figure>
 
          Roughtime request and response packets MUST be transmitted in a single
-         datagram when the UDP transport mode is used. Setting the packet's don't
-         fragment bit [RFC791] is OPTIONAL in IPv4 networks.
+         datagram when the UDP transport mode is used. Setting the packet's
+         don't fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4
+         networks.
          
          Multiple requests and responses can be exchanged over an established TCP
          connection. Clients MAY send multiple requests at once and servers MAY
@@ -387,13 +411,13 @@
         <t>
           A request is a Roughtime message with the tags NONC and VER. Over a
           UDP connection the size of the request message SHOULD be at
-          least 1024 bytes.To attain this size the PAD tag SHOULD be
+          least 1024 bytes. To attain this size the PAD tag SHOULD be
           added to the message.  Tags other than NONC and VER SHOULD be
           ignored by the server. Responding to requests shorter than
           1024 bytes is OPTIONAL and servers MUST NOT send responses
           larger than the requests they are replying to.
         </t>
-        <t> In a request the VER tag contains a list of versions. The
+        <t> In a request, the VER tag contains a list of versions. The
         VER tag MUST include at least one Roughtime version supported
         by the client. The client MUST ensure that the version numbers
         and tags included in the request are not incompatible with
@@ -741,7 +765,11 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         <t> IANA is requested to create a new registry entitled
         &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
         <list>
-          <t> Version: a 32-bit unsigned integer </t>
+          <t> Version (REQUIRED): a 32-bit unsigned integer </t>
+          <t>
+            Reference (REQUIRED): A reference to a document specifying the
+            Roughtime version.
+          </t>
         </list>
         The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
         set are reserved.
@@ -751,8 +779,11 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         </t>
         <texttable>
           <ttcol>Version</ttcol>
+          <ttcol>Reference</ttcol>
           <c>1</c>
+          <c>[[this memo]]</c>
         </texttable>
+      </section>
         
 
       <section title="Roughtime Tag Registry">
@@ -793,6 +824,14 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>SIG</c>
           <c>[[this memo]]</c>
 
+          <c>0x00524556</c>
+          <c>VER</c>
+          <c>[[this memo]]</c>
+
+          <c>0x31545544</c>
+          <c>DUT1</c>
+          <c>[[this memo]]</c>
+
           <c>0x434e4f48</c>
           <c>NONC</c>
           <c>[[this memo]]</c>
@@ -805,12 +844,20 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>PATH</c>
           <c>[[this memo]]</c>
 
+          <c>0x49415444</c>
+          <c>DTAI</c>
+          <c>[[this memo]]</c>
+
           <c>0x49444152</c>
           <c>RADI</c>
           <c>[[this memo]]</c>
 
           <c>0x4b425550</c>
           <c>PUBK</c>
+          <c>[[this memo]]</c>
+
+          <c>0x5041454c</c>
+          <c>LEAP</c>
           <c>[[this memo]]</c>
 
           <c>0x5044494d</c>
@@ -935,13 +982,14 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     </references>
     <references title="Informative References">
       <?rfc include="reference.RFC.0768.xml"?>
+      <?rfc include='reference.RFC.0791.xml'?>
       <?rfc include="reference.RFC.0793.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
-      <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
+      <?rfc include="reference.I-D.draft-ietf-ntp-using-nts-for-ntp-25.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
@@ -1002,9 +1050,13 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               </xref></t>
           <t hangText="NTS   "><xref target="I-D.ietf-ntp-using-nts-for-ntp">
               Network Time Security</xref></t>
+          <t hangText="TAI   "><xref target="ITU-R_TF.460-6">International
+              Atomic Time (Temps Atomique International)</xref></t>
           <t hangText="TCP   "><xref target="RFC0793">Transmission Control
               Protocol</xref></t>
           <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
+              </xref></t>
+          <t hangText="UT    "><xref target="ITU-R_TF.460-6">Universal Time
               </xref></t>
           <t hangText="UTC   "><xref target="ITU-R_TF.460-6">Coordinated
               Universal Time</xref></t>
