@@ -352,12 +352,13 @@
 
     <section title="Protocol">
       <t>
-         As described in <xref target="protocol-overview" />, clients initiate
-         time synchronization by sending requests containing a nonce to servers
-         who send signed time responses in return. Roughtime packets can be
-         sent between clients and servers either as UDP datagrams or via TCP
-         streams. Servers SHOULD support the UDP transport mode, while TCP
-         transport is OPTIONAL.
+         As described in <xref target="protocol-overview"/>, clients
+         initiate time synchronization by sending requests containing
+         a nonce to servers who send signed time responses in
+         return. Roughtime packets can be sent between clients and
+         servers either as UDP datagrams or via TCP streams. Servers
+         SHOULD support the UDP transport mode, while TCP transport is
+         OPTIONAL.
          
          A Roughtime packet MUST be formatted according to
          <xref target="fig-roughtime-packet-format" /> and as described here.
@@ -387,9 +388,8 @@
          </figure>
 
          Roughtime request and response packets MUST be transmitted in a single
-         datagram when the UDP transport mode is used. Setting the packet's
-         don't fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4
-         networks.
+         datagram when the UDP transport mode is used. Setting the packet's don't
+         fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4 networks.
          
          Multiple requests and responses can be exchanged over an established TCP
          connection. Clients MAY send multiple requests at once and servers MAY
@@ -765,11 +765,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         <t> IANA is requested to create a new registry entitled
         &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
         <list>
-          <t> Version (REQUIRED): a 32-bit unsigned integer </t>
-          <t>
-            Reference (REQUIRED): A reference to a document specifying the
-            Roughtime version.
-          </t>
+          <t> Version: a 32-bit unsigned integer </t>
+          <t> Reference: the description of the version </t>
         </list>
         The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
         set are reserved.
@@ -784,7 +781,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>[[this memo]]</c>
         </texttable>
       </section>
-        
 
       <section title="Roughtime Tag Registry">
         <t>
@@ -887,7 +883,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>0x58444e49</c>
           <c>INDX</c>
           <c>[[this memo]]</c>
-
         </texttable>
       </section>
     </section>
