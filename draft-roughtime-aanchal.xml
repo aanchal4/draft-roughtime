@@ -278,6 +278,7 @@
             with the sign bit in the most significant bit. It is serialized least significant byte first.
             The negative zero value (0x80000000) MUST NOT be used.
           </t>
+        </section>
         <section title="uint32">
           <t>
             A uint32 is a 32 bit unsigned integer. It is serialized with the
@@ -351,11 +352,13 @@
 
     <section title="Protocol">
       <t>
-         As described in Section 3, clients initiate time synchronization by
-         sending requests containing a nonce to servers who send signed time
-         responses in return. Roughtime packets can be sent between clients and
-         servers either as UDP datagrams or via TCP streams. Servers SHOULD
-         support the UDP transport mode, while TCP transport is OPTIONAL.
+         As described in <xref target="protocol-overview"/>, clients
+         initiate time synchronization by sending requests containing
+         a nonce to servers who send signed time responses in
+         return. Roughtime packets can be sent between clients and
+         servers either as UDP datagrams or via TCP streams. Servers
+         SHOULD support the UDP transport mode, while TCP transport is
+         OPTIONAL.
          
          A Roughtime packet MUST be formatted according to TODO FIGURE and as
          described here. The first field is a uint64 with the value
@@ -365,7 +368,7 @@
 
          Roughtime request and response packets MUST be transmitted in a single
          datagram when the UDP transport mode is used. Setting the packet's don't
-         fragment bit [RFC791] is OPTIONAL in IPv4 networks.
+         fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4 networks.
          
          Multiple requests and responses can be exchanged over an established TCP
          connection. Clients MAY send multiple requests at once and servers MAY
@@ -387,7 +390,7 @@
         <t>
           A request is a Roughtime message with the tags NONC and VER. Over a
           UDP connection the size of the request message SHOULD be at
-          least 1024 bytes.To attain this size the PAD tag SHOULD be
+          least 1024 bytes. To attain this size the PAD tag SHOULD be
           added to the message.  Tags other than NONC and VER SHOULD be
           ignored by the server. Responding to requests shorter than
           1024 bytes is OPTIONAL and servers MUST NOT send responses
@@ -742,6 +745,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
         <list>
           <t> Version: a 32-bit unsigned integer </t>
+          <t> Reference: the description of the version </t>
         </list>
         The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
         set are reserved.
@@ -751,9 +755,11 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         </t>
         <texttable>
           <ttcol>Version</ttcol>
+          <ttcol>Reference</ttcol>
           <c>1</c>
+          <c>[[this memo]]</c>
         </texttable>
-        
+      </section>
 
       <section title="Roughtime Tag Registry">
         <t>
@@ -839,6 +845,22 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
 
           <c>0x58444e49</c>
           <c>INDX</c>
+          <c>[[this memo]]</c>
+
+          <c>0x44555431</c>
+          <c>DUT1</c>
+          <c>[[this memo]]</c>
+
+          <c>0x44544149</c>
+          <c>DTAI</c>
+          <c>[[this memo]]</c>
+          
+          <c>0x4c454150</c>
+          <c>LEAP</c>
+          <c>[[this memo]]</c>
+
+          <c>0xx00564552</c>
+          <c>VER</c>
           <c>[[this memo]]</c>
 
         </texttable>
@@ -941,6 +963,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
+      <?rfc include='reference.RFC.0791.xml'?> 
       <?rfc include="reference.I-D.ietf-ntp-using-nts-for-ntp.xml"?>
 
       <reference anchor="Autokey"
