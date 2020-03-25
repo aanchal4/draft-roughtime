@@ -421,18 +421,19 @@
           1024 bytes is OPTIONAL and servers MUST NOT send responses
           larger than the requests they are replying to.
         </t>
-        <t> In a request, the VER tag contains a list of versions. The
-        VER tag MUST include at least one Roughtime version supported
-        by the client. The client MUST ensure that the version numbers
-        and tags included in the request are not incompatible with
-        each other or the package contents.
-        </t>
         <t>
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
           by hashing a previous Roughtime response message together with a blind
           as described in <xref target="cheater-detection"/>. If no previous
           responses are avaiable to the client, the nonce SHOULD be generated at
           random.
+        </t>
+        <t>
+          In a request, the VER tag contains a list of versions. The VER tag
+          MUST include at least one Roughtime version supported by the client.
+          The client MUST ensure that the version numbers and tags included in
+          the request are not incompatible with each other or the packet
+          contents.
         </t>
         <t>
           The PAD tag SHOULD be used by clients to ensure their request messages
@@ -442,9 +443,9 @@
 
       <section title="Responses">
         <t>
-          A response MUST contain the tags SREP, SIG, CERT, INDX, PATH and VER. The SIG
-          tag is a signature over the SREP value using the public key contained
-          in CERT, as explained below.
+          A response MUST contain the tags SREP, SIG, CERT, INDX, PATH and VER.
+          The SIG tag is a signature over the SREP value using the public key
+          contained in CERT, as explained below.
         </t>
         <t>
           The SREP tag contains a time response. Its value is a
@@ -452,7 +453,6 @@
           NONC. The server MAY include any of the tags DUT1, DTAI and
           LEAP in the contents of the SREP tag.
         </t>
-        <t> NONC contains the nonce of the message being responded to. </t>
         <t>
           The ROOT tag contains a 32 byte value of a Merkle tree root as
           described in <xref target="merkle-tree"/>.
@@ -465,6 +465,9 @@
           the accuracy of MIDP in microseconds. Servers MUST ensure that the
           true time is within (MIDP-RADI, MIDP+RADI) at the time they compose
           the response message.
+        </t>
+        <t>
+          The NONC tag contains the nonce of the message being responded to.
         </t>
         <t>
           The DUT1 tag value is an int32 indicating the predicted difference
@@ -488,7 +491,6 @@
           indicates that the server does not hold any updated leap second
           information.
         </t>
-
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
           <xref target="RFC8032"/> over a signature context concatenated with
@@ -534,6 +536,12 @@
           ROOT value as described in <xref target="merkle-tree"/>. In the case
           where a response is prepared for a single request and the Merkle tree
           contains only the root node, the size of PATH is zero.
+        </t>
+        <t>
+          In a response, the VER tag MUST contain a single version number. It
+          SHOULD be one of the version numbers supplied by the client in its
+          request. The server MUST ensure that the version number corresponds
+          with the rest of the packet contents.
         </t>
       </section>
 
