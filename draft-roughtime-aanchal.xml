@@ -778,8 +778,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         <t> IANA is requested to create a new registry entitled
         &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
         <list>
-          <t> Version: a 32-bit unsigned integer </t>
-          <t> Reference: the description of the version </t>
+          <t> Version (REQUIRED): a 32-bit unsigned integer </t>
+          <t> Reference (REQUIRED): the description of the version </t>
         </list>
         The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
         set are reserved.
