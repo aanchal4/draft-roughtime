@@ -648,15 +648,15 @@
         entirely within this window or reject measurements that fall
         to far outside. This assumes time has not been stepped.  If
         the NTP process decides to step the time, it MUST use
-        roughtime to ensure the new truetime estimate that will be
+        Roughtime to ensure the new truetime estimate that will be
         stepped to is consistent with the true time.</t>
 
-        <t>Should this window become too large, another roughtime
+        <t>Should this window become too large, another Roughtime
         measurement is called for. The definition of "too large" is
         implementation defined.</t>
 
         <t>Implementations MAY use other, more sophisticated means of
-        adjusting the clock respecting roughtime information.</t>
+        adjusting the clock respecting Roughtime information.</t>
     </section>
     <section title="Cheater Detection" anchor="cheater-detection">
       <t>
@@ -739,7 +739,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         detect malfeasance and have a way to report it to trust anchors.
       </t>
       <t>
-        Because only a single roughtime server is required for successful
+        Because only a single Roughtime server is required for successful
         synchronization, Roughtime does not have the incentive problems that
         have prevented effective enforcement of discipline on the web PKI. We
         expect that some clients will aggressively monitor server behavior.
