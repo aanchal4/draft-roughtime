@@ -215,7 +215,7 @@
       </t>
     </section>
 
-    <section title="The guarantee">
+    <section title="The Guarantee">
       <t>
         A Roughtime server guarantees that a response to a query sent
         at t_1, received at t_2, and with timestamp t_3 has been
@@ -567,7 +567,7 @@
           nonce.
         </t>
 
-        <section title="Root value validity check algorithm"
+        <section title="Root Value Validity Check Algorithm"
             anchor="root-check">
           <t>
             One starts by computing the hash of the NONC value from the request,
@@ -591,7 +591,7 @@
         </section>
       </section>
 
-      <section title="Validity of response">
+      <section title="Validity of Response">
         <t>
           A client MUST check the following properties when it receives a
           response. We assume the long-term server public key is known to the
@@ -714,7 +714,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       </t>
     </section>
 
-    <section title="Trust anchors and policies">
+    <section title="Trust Anchors and Policies">
       <t>
         A trust anchor is any distributor of a list of trusted servers. It is
         RECOMMENDED that trust anchors subscribe to a common public forum where
