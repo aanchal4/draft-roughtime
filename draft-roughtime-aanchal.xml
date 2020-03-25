@@ -54,7 +54,7 @@
     <area>General</area>
 
     <workgroup>Internet Engineering Task Force</workgroup>
-    
+
     <keyword>roughtime</keyword>
 
     <keyword>time synchronization</keyword>
@@ -359,7 +359,7 @@
          servers either as UDP datagrams or via TCP streams. Servers
          SHOULD support the UDP transport mode, while TCP transport is
          OPTIONAL.
-         
+
          A Roughtime packet MUST be formatted according to
          <xref target="fig-roughtime-packet-format" /> and as described here.
          The first field is a uint64 with the value 0x4d49544847554f52
@@ -390,7 +390,7 @@
          Roughtime request and response packets MUST be transmitted in a single
          datagram when the UDP transport mode is used. Setting the packet's don't
          fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4 networks.
-         
+
          Multiple requests and responses can be exchanged over an established TCP
          connection. Clients MAY send multiple requests at once and servers MAY
          send responses out of order. The connection SHOULD be closed by the
@@ -484,7 +484,7 @@
           indicates that the server does not hold any updated leap second
           information.
         </t>
-       
+
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
           <xref target="RFC8032"/> over a signature context concatenated with
