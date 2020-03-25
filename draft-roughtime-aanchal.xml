@@ -352,24 +352,25 @@
 
     <section title="Protocol">
       <t>
-         As described in <xref target="protocol-overview"/>, clients
-         initiate time synchronization by sending requests containing
-         a nonce to servers who send signed time responses in
-         return. Roughtime packets can be sent between clients and
-         servers either as UDP datagrams or via TCP streams. Servers
-         SHOULD support the UDP transport mode, while TCP transport is
-         OPTIONAL.
-
-         A Roughtime packet MUST be formatted according to
-         <xref target="fig-roughtime-packet-format" /> and as described here.
-         The first field is a uint64 with the value 0x4d49544847554f52
-         ("ROUGHTIM" in ASCII). The second field is a uint32 and contains the
-         length of the third field. The third and last field contains a
-         Roughtime message as specified in <xref target="format"/>.
-
-         <figure anchor="fig-roughtime-packet-format"
-           title="Roughtime Packet Format">
-           <artwork><![CDATA[
+        As described in <xref target="protocol-overview"/>, clients
+        initiate time synchronization by sending requests containing
+        a nonce to servers who send signed time responses in
+        return. Roughtime packets can be sent between clients and
+        servers either as UDP datagrams or via TCP streams. Servers
+        SHOULD support the UDP transport mode, while TCP transport is
+        OPTIONAL.
+      </t>
+      <t>
+        A Roughtime packet MUST be formatted according to
+        <xref target="fig-roughtime-packet-format" /> and as described here.
+        The first field is a uint64 with the value 0x4d49544847554f52
+        ("ROUGHTIM" in ASCII). The second field is a uint32 and contains the
+        length of the third field. The third and last field contains a
+        Roughtime message as specified in <xref target="format"/>.
+      </t>
+      <figure anchor="fig-roughtime-packet-format"
+          title="Roughtime Packet Format">
+        <artwork><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -384,27 +385,30 @@
 .                                                               .
 |                                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]>
-           </artwork>
-         </figure>
-
-         Roughtime request and response packets MUST be transmitted in a single
-         datagram when the UDP transport mode is used. Setting the packet's don't
-         fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4 networks.
-
-         Multiple requests and responses can be exchanged over an established TCP
-         connection. Clients MAY send multiple requests at once and servers MAY
-         send responses out of order. The connection SHOULD be closed by the
-         client when it has no more requests to send and has received all
-         expected responses. Either side SHOULD close the connection in response
-         to synchronization, format, implementation-defined timeouts, or other
-         errors.
-
-         All requests and responses MUST contain the VER tag. It contains a list
-         of one or more uint32 version numbers. The version of Roughtime
-         specified by this memo has version number 1.
-
-         For testing drafts of this memo, a version number of 0x80000000 plus the
-         draft number is used.
+        </artwork>
+      </figure>
+      <t>
+        Roughtime request and response packets MUST be transmitted in a single
+        datagram when the UDP transport mode is used. Setting the packet's don't
+        fragment bit <xref target="RFC0791" /> is OPTIONAL in IPv4 networks.
+      </t>
+      <t>
+        Multiple requests and responses can be exchanged over an established TCP
+        connection. Clients MAY send multiple requests at once and servers MAY
+        send responses out of order. The connection SHOULD be closed by the
+        client when it has no more requests to send and has received all
+        expected responses. Either side SHOULD close the connection in response
+        to synchronization, format, implementation-defined timeouts, or other
+        errors.
+      </t>
+      <t>
+        All requests and responses MUST contain the VER tag. It contains a list
+        of one or more uint32 version numbers. The version of Roughtime
+        specified by this memo has version number 1.
+      </t>
+      <t>
+        For testing drafts of this memo, a version number of 0x80000000 plus the
+        draft number is used.
       </t>
 
       <section title="Requests">
