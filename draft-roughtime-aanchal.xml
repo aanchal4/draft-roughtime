@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-00" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-01" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -49,7 +49,7 @@
       </address>
     </author>
 
-    <date year="2020" month="January" day="27"/>
+    <date year="2020" month="April" day="1"/>
 
     <area>General</area>
 
