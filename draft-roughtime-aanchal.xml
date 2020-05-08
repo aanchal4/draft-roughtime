@@ -315,7 +315,8 @@
           </t>
           <t>
             The MJD is the number of UTC days since 17 November 1858
-            <xref target="ITU-R_TF.457-2"/>.
+            <xref target="ITU-R_TF.457-2"/>. It is useful to note that 1 January 1970 is
+            40,587 days after 17 November 1858.
           </t>
           <t>
             Note that, unlike NTP, this representation does not use the full
@@ -344,8 +345,9 @@
           length.
         </t>
         <t>
-          Tags MUST be listed in the same order as the offsets of their values.
-          A tag MUST NOT appear more than once in a header.
+          Tags MUST be listed in the same order as the offsets of
+          their values.  A tag MUST NOT appear more than once in a
+          header. Tags MUST also be sorted by numeric value.
         </t>
       </section>
     </section>
