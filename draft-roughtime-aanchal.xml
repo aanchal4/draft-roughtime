@@ -445,15 +445,21 @@
 
       <section title="Responses">
         <t>
-          A response MUST contain the tags SREP, SIG, CERT, INDX, PATH and VER.
-          The SIG tag is a signature over the SREP value using the public key
-          contained in CERT, as explained below.
+          A response MUST contain the tags CERT, INDX, NONC, PATH, SIG, SREP,
+          and VER.
+        </t>
+        <t>
+          The SIG tag is a signature over the SREP value using the
+          public key contained in CERT, as explained below.
         </t>
         <t>
           The SREP tag contains a time response. Its value is a
-          Roughtime message with the tags ROOT, MIDP, and RADI, and
-          NONC. The server MAY include any of the tags DUT1, DTAI and
-          LEAP in the contents of the SREP tag.
+          Roughtime message with the tags ROOT, MIDP, and RADI. The server MAY
+          include any of the tags DUT1, DTAI and LEAP in the contents of the
+          SREP tag.
+        </t>
+        <t>
+          The NONC tag contains the nonce of the message being responded to.
         </t>
         <t>
           The ROOT tag contains a 32 byte value of a Merkle tree root as
@@ -467,9 +473,6 @@
           the accuracy of MIDP in microseconds. Servers MUST ensure that the
           true time is within (MIDP-RADI, MIDP+RADI) at the time they compose
           the response message.
-        </t>
-        <t>
-          The NONC tag contains the nonce of the message being responded to.
         </t>
         <t>
           The DUT1 tag value is an int32 indicating the predicted difference
