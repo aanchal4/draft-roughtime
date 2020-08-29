@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-02" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-03" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -49,7 +49,7 @@
       </address>
     </author>
 
-    <date year="2020" month="June" day="01"/>
+    <date year="2020" month="August" day="29"/>
 
     <area>General</area>
 
@@ -565,7 +565,7 @@
         <t>
           The values of all nodes are calculated from the leaf nodes and up
           towards the root node using the first 32 bytes of the output of the
-          SHA-512/256 hash algorithm <xref target="SHS"/>. For leaf nodes, the
+          SHA-512 hash algorithm <xref target="SHS"/>. For leaf nodes, the
           byte 0x00 is prepended to the nonce before applying the hash function.
           For all other nodes, the byte 0x01 is concatenated with first the left
           and then the right child node value before applying the hash function.
