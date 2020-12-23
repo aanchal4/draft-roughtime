@@ -347,7 +347,7 @@
         <t>
           Tags MUST be listed in the same order as the offsets of
           their values.  A tag MUST NOT appear more than once in a
-          header. Tags MUST also be sorted by numeric value.
+          header. Tags MUST also be sorted in ascending order by numeric value.
         </t>
       </section>
     </section>
