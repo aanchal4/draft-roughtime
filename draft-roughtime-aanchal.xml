@@ -486,15 +486,16 @@
           Circular T.
         </t>
         <t>
-          The LEAP tag contains zero or more int32 values. Each value represents
-          the MJD of a past or future leap second event. Positive values represent
-          the addition of a second at the indicated date and negative values
-          represent the removal of a second at the indicated (negative) date. The
-          first item in the list MUST be the last (past or future) leap second
-          event that the server knows about. The leap second events MUST be sorted
-          in reverse chronological order. A leap tag with zero int32 values
-          indicates that the server does not hold any updated leap second
-          information.
+          The LEAP tag contains zero or more int32 values, each representing
+          a past or future leap second event. Positive values represent the
+          addition of a second and negative values represent the removal of a
+          second. The absolute value represents the MJD of the second after the
+          leap second event, i.e., the first second with a new UTC - TAI
+          difference. The leap second events MUST be sorted in reverse
+          chronological order and the first item MUST be the last (past or
+          future) leap second event that the server knows about. A LEAP tag with
+          zero int32 values indicates that the server does not hold any updated
+          leap second information.
         </t>
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
