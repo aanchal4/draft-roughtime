@@ -784,19 +784,34 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         <t> IANA is requested to create a new registry entitled
         &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
         <list>
-          <t> Version (REQUIRED): a 32-bit unsigned integer </t>
-          <t> Reference (REQUIRED): the description of the version </t>
+          <t> Version ID (REQUIRED): a 32-bit unsigned integer </t>
+          <t> Version name (REQUIRED): A short text string naming the version being identified. </t>
+          <t> Reference (REQUIRED): A reference to a relevant specification document. </t>
         </list>
-        The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
-        set are reserved.
+          The policy for allocation of new entries SHOULD be: IETF Review.
         </t>
         <t>
           The initial contents of this registry shall be as follows:
         </t>
         <texttable>
-          <ttcol>Version</ttcol>
+          <ttcol>Version ID</ttcol>
+          <ttcol>Version name</ttcol>
           <ttcol>Reference</ttcol>
-          <c>1</c>
+
+          <c>0x0</c>
+          <c>Reserved</c>
+          <c>[[this memo]]</c>
+
+          <c>0x1</c>
+          <c>Roughtime version 1</c>
+          <c>[[this memo]]</c>
+
+          <c>0x2-0x7fffffff</c>
+          <c>Unassigned</c>
+          <c></c>
+
+          <c>0x80000000-0xffffffff</c>
+          <c>Reserved for Private or Experimental use</c>
           <c>[[this memo]]</c>
         </texttable>
       </section>
