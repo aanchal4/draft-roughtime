@@ -77,11 +77,11 @@
         deployed protocols such as the Network Time Protocol (NTP)
         <xref target="RFC5905"/> lack essential security features, and even
         newer protocols like Network Time Security (NTS)
-        <xref target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that the
-        servers behave correctly. Authenticating time servers prevents network
-        adversaries from modifying time packets, but an authenticated time
-        server still has full control over the contents of the time packet and
-        may go rogue. The Roughtime protocol provides cryptographic proof of
+        <xref target="RFC8915"/> fail to ensure that the servers behave
+        correctly. Authenticating time servers prevents network adversaries
+        from modifying time packets, but an authenticated time server still
+        has full control over the contents of the time packet and may go
+        rogue. The Roughtime protocol provides cryptographic proof of
         malfeasance, enabling clients to detect and prove to a third party a
         server's attempts to influence the time a client computes.
       </t>
@@ -1013,7 +1013,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
-      <?rfc include="reference.I-D.draft-ietf-ntp-using-nts-for-ntp-25.xml"?>
+      <?rfc include="reference.RFC.8915.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
@@ -1072,7 +1072,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <t hangText="MJD   ">Modified Julian Date</t>
           <t hangText="NTP   "><xref target="RFC5905">Network Time Protocol
               </xref></t>
-          <t hangText="NTS   "><xref target="I-D.ietf-ntp-using-nts-for-ntp">
+          <t hangText="NTS   "><xref target="RFC8915">
               Network Time Security</xref></t>
           <t hangText="TAI   "><xref target="ITU-R_TF.460-6">International
               Atomic Time (Temps Atomique International)</xref></t>
