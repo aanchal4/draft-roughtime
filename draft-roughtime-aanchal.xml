@@ -908,8 +908,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     <section title="Security Considerations">
       <t>
         Since the only supported signature scheme, Ed25519, is not quantum
-        resistant, this protocol will not survive the advent of quantum
-        computers.
+        resistant, the Roughtime version described in this memo will not survive
+        the advent of quantum computers.
       </t>
       <t>
         Maintaining a list of trusted servers and adjudicating violations of the
