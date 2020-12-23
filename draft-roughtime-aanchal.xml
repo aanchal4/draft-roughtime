@@ -976,10 +976,12 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <title>Secure Hash Standard</title>
           <author>
             <organization>
-            NIST </organization>
+              National Institute of Standards and Technology
+            </organization>
           </author>
           <date year="2015" month="August"/>
         </front>
+        <seriesInfo name="DOI" value="10.6028/NIST.FIPS.180-4"/>
         <seriesInfo name="FIPS" value="180-4"/>
       </reference>
       <reference anchor="ITU-R_TF.460-6">
@@ -999,7 +1001,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
 
       <?rfc include="reference.RFC.0020.xml"?>
       <?rfc include="reference.RFC.4648.xml"?>
-      <?rfc include="reference.RFC.6234.xml"?>
       <?rfc include='reference.RFC.6335.xml'?>
       <?rfc include="reference.RFC.8032.xml"?>
       <?rfc include="reference.RFC.8259.xml"?>
