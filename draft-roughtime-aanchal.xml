@@ -665,9 +665,9 @@
     </section>
     <section title="Cheater Detection" anchor="cheater-detection">
       <t>
-        A chain of responses is a series of responses where the SHA-512/256 hash of
+        A chain of responses is a series of responses where the SHA-512 hash of
         the preceding response H, is concatenated with a 64 byte blind X, and
-        then SHA-512/256(H, X) is the nonce used in the subsequent response. These
+        then SHA-512(H, X) is the nonce used in the subsequent response. These
         may be represented as an array of objects in JavaScript Object Notation
         (JSON) format <xref target="RFC8259"/> where each object may have keys
         "blind" and "response_packet". Packet has the Base64
