@@ -77,11 +77,11 @@
         deployed protocols such as the Network Time Protocol (NTP)
         <xref target="RFC5905"/> lack essential security features, and even
         newer protocols like Network Time Security (NTS)
-        <xref target="RFC8915"/> fail to ensure that the servers behave
-        correctly. Authenticating time servers prevents network adversaries
-        from modifying time packets, but an authenticated time server still
-        has full control over the contents of the time packet and may go
-        rogue. The Roughtime protocol provides cryptographic proof of
+        <xref target="RFC8915"/> lack mechanisms to ensure that the servers
+        behave correctly. Authenticating time servers prevents network
+        adversaries from modifying time packets, but an authenticated time
+        server still has full control over the contents of the time packet and
+        may go rogue. The Roughtime protocol provides cryptographic proof of
         malfeasance, enabling clients to detect and prove to a third party a
         server's attempts to influence the time a client computes.
       </t>
