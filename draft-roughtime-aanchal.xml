@@ -946,9 +946,12 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <t>
         This protocol is designed to obscure all client identifiers. Servers
         necessarily have persistent long-term identities essential to enforcing
-        correct behavior. Generating nonces from previous responses without
-        using a blind can enable tracking of clients as they move between
-        networks.
+        correct behavior.
+      </t>
+      <t>
+        Generating nonces without using a blind as described in
+        <xref target="cheater-detection"/> can cause leaks of private data or
+        enable tracking of clients as they move between networks.
       </t>
     </section>
   </middle>
