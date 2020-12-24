@@ -77,8 +77,8 @@
         deployed protocols such as the Network Time Protocol (NTP)
         <xref target="RFC5905"/> lack essential security features, and even
         newer protocols like Network Time Security (NTS)
-        <xref target="I-D.ietf-ntp-using-nts-for-ntp"/> fail to ensure that the
-        servers behave correctly. Authenticating time servers prevents network
+        <xref target="RFC8915"/> lack mechanisms to ensure that the servers
+        behave correctly. Authenticating time servers prevents network
         adversaries from modifying time packets, but an authenticated time
         server still has full control over the contents of the time packet and
         may go rogue. The Roughtime protocol provides cryptographic proof of
@@ -347,7 +347,7 @@
         <t>
           Tags MUST be listed in the same order as the offsets of
           their values.  A tag MUST NOT appear more than once in a
-          header. Tags MUST also be sorted by numeric value.
+          header. Tags MUST also be sorted in ascending order by numeric value.
         </t>
       </section>
     </section>
@@ -486,15 +486,16 @@
           Circular T.
         </t>
         <t>
-          The LEAP tag contains zero or more int32 values. Each value represents
-          the MJD of a past or future leap second event. Positive values represent
-          the addition of a second at the indicated date and negative values
-          represent the removal of a second at the indicated (negative) date. The
-          first item in the list MUST be the last (past or future) leap second
-          event that the server knows about. The leap second events MUST be sorted
-          in reverse chronological order. A leap tag with zero int32 values
-          indicates that the server does not hold any updated leap second
-          information.
+          The LEAP tag contains zero or more int32 values, each representing
+          a past or future leap second event. Positive values represent the
+          addition of a second and negative values represent the removal of a
+          second. The absolute value represents the MJD of the second after the
+          leap second event, i.e., the first second with a new UTC - TAI
+          difference. The leap second events MUST be sorted in reverse
+          chronological order and the first item MUST be the last (past or
+          future) leap second event that the server knows about. A LEAP tag with
+          zero int32 values indicates that the server does not hold any updated
+          leap second information.
         </t>
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
@@ -665,9 +666,9 @@
     </section>
     <section title="Cheater Detection" anchor="cheater-detection">
       <t>
-        A chain of responses is a series of responses where the SHA-512/256 hash of
+        A chain of responses is a series of responses where the SHA-512 hash of
         the preceding response H, is concatenated with a 64 byte blind X, and
-        then SHA-512/256(H, X) is the nonce used in the subsequent response. These
+        then SHA-512(H, X) is the nonce used in the subsequent response. These
         may be represented as an array of objects in JavaScript Object Notation
         (JSON) format <xref target="RFC8259"/> where each object may have keys
         "blind" and "response_packet". Packet has the Base64
@@ -783,19 +784,34 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         <t> IANA is requested to create a new registry entitled
         &quot; Roughtime Version Registry &quot; Entries shall have the following fields:
         <list>
-          <t> Version (REQUIRED): a 32-bit unsigned integer </t>
-          <t> Reference (REQUIRED): the description of the version </t>
+          <t> Version ID (REQUIRED): a 32-bit unsigned integer </t>
+          <t> Version name (REQUIRED): A short text string naming the version being identified. </t>
+          <t> Reference (REQUIRED): A reference to a relevant specification document. </t>
         </list>
-        The policy for allocation of new entries SHOULD be IETF consensus. Versions with the high bit
-        set are reserved.
+          The policy for allocation of new entries SHOULD be: IETF Review.
         </t>
         <t>
           The initial contents of this registry shall be as follows:
         </t>
         <texttable>
-          <ttcol>Version</ttcol>
+          <ttcol>Version ID</ttcol>
+          <ttcol>Version name</ttcol>
           <ttcol>Reference</ttcol>
-          <c>1</c>
+
+          <c>0x0</c>
+          <c>Reserved</c>
+          <c>[[this memo]]</c>
+
+          <c>0x1</c>
+          <c>Roughtime version 1</c>
+          <c>[[this memo]]</c>
+
+          <c>0x2-0x7fffffff</c>
+          <c>Unassigned</c>
+          <c></c>
+
+          <c>0x80000000-0xffffffff</c>
+          <c>Reserved for Private or Experimental use</c>
           <c>[[this memo]]</c>
         </texttable>
       </section>
@@ -846,7 +862,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <c>DUT1</c>
           <c>[[this memo]]</c>
 
-          <c>0x434e4f48</c>
+          <c>0x434e4f4e</c>
           <c>NONC</c>
           <c>[[this memo]]</c>
 
@@ -908,8 +924,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
     <section title="Security Considerations">
       <t>
         Since the only supported signature scheme, Ed25519, is not quantum
-        resistant, this protocol will not survive the advent of quantum
-        computers.
+        resistant, the Roughtime version described in this memo will not survive
+        the advent of quantum computers.
       </t>
       <t>
         Maintaining a list of trusted servers and adjudicating violations of the
@@ -946,9 +962,12 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <t>
         This protocol is designed to obscure all client identifiers. Servers
         necessarily have persistent long-term identities essential to enforcing
-        correct behavior. Generating nonces from previous responses without
-        using a blind can enable tracking of clients as they move between
-        networks.
+        correct behavior.
+      </t>
+      <t>
+        Generating nonces without using a blind as described in
+        <xref target="cheater-detection"/> can cause leaks of private data or
+        enable tracking of clients as they move between networks.
       </t>
     </section>
   </middle>
@@ -976,10 +995,12 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <title>Secure Hash Standard</title>
           <author>
             <organization>
-            NIST </organization>
+              National Institute of Standards and Technology
+            </organization>
           </author>
           <date year="2015" month="August"/>
         </front>
+        <seriesInfo name="DOI" value="10.6028/NIST.FIPS.180-4"/>
         <seriesInfo name="FIPS" value="180-4"/>
       </reference>
       <reference anchor="ITU-R_TF.460-6">
@@ -999,7 +1020,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
 
       <?rfc include="reference.RFC.0020.xml"?>
       <?rfc include="reference.RFC.4648.xml"?>
-      <?rfc include="reference.RFC.6234.xml"?>
       <?rfc include='reference.RFC.6335.xml'?>
       <?rfc include="reference.RFC.8032.xml"?>
       <?rfc include="reference.RFC.8259.xml"?>
@@ -1013,7 +1033,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.7384.xml"?>
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
-      <?rfc include="reference.I-D.draft-ietf-ntp-using-nts-for-ntp-25.xml"?>
+      <?rfc include="reference.RFC.8915.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
@@ -1072,7 +1092,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <t hangText="MJD   ">Modified Julian Date</t>
           <t hangText="NTP   "><xref target="RFC5905">Network Time Protocol
               </xref></t>
-          <t hangText="NTS   "><xref target="I-D.ietf-ntp-using-nts-for-ntp">
+          <t hangText="NTS   "><xref target="RFC8915">
               Network Time Security</xref></t>
           <t hangText="TAI   "><xref target="ITU-R_TF.460-6">International
               Atomic Time (Temps Atomique International)</xref></t>
