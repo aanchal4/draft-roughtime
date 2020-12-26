@@ -415,13 +415,7 @@
 
       <section title="Requests">
         <t>
-          A request is a Roughtime message with the tags NONC and VER. Over a
-          UDP connection the size of the request message SHOULD be at
-          least 1024 bytes. To attain this size the PAD tag SHOULD be
-          added to the message.  Tags other than NONC and VER SHOULD be
-          ignored by the server. Responding to requests shorter than
-          1024 bytes is OPTIONAL and servers MUST NOT send responses
-          larger than the requests they are replying to.
+          A request MUST contain the tags NONC and VER.
         </t>
         <t>
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
@@ -438,8 +432,15 @@
           contents.
         </t>
         <t>
-          The PAD tag SHOULD be used by clients to ensure their request messages
-          are at least 1024 bytes in size. Its value SHOULD be all zeros.
+          Tags other than NONC and VER SHOULD be ignored by the server.
+        </t>
+        <t>
+          The size of the request message SHOULD be at least 1024 bytes when
+          the UDP transport mode is used. To attain this size the PAD tag
+          SHOULD be added to the message. Its value SHOULD be all zeros.
+          Responding to requests shorter than 1024 bytes is OPTIONAL and
+          servers MUST NOT send responses larger than the requests they are
+          replying to.
         </t>
       </section>
 
