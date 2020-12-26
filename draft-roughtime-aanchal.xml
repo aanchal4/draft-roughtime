@@ -274,9 +274,10 @@
       <section title="Data Types" anchor="format">
         <section title="int32">
           <t>
-            An int32 is a 32 bit signed integer. It is serialized in sign-magitude representation
-            with the sign bit in the most significant bit. It is serialized least significant byte first.
-            The negative zero value (0x80000000) MUST NOT be used.
+            An int32 is a 32 bit signed integer. It is serialized in
+            sign-magnitude representation with the sign bit in the most
+            significant bit. It is serialized least significant byte first. The
+            negative zero value (0x80000000) MUST NOT be used.
           </t>
         </section>
         <section title="uint32">
@@ -421,7 +422,7 @@
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
           by hashing a previous Roughtime response message together with a blind
           as described in <xref target="cheater-detection"/>. If no previous
-          responses are avaiable to the client, the nonce SHOULD be generated at
+          responses are available to the client, the nonce SHOULD be generated at
           random.
         </t>
         <t>
