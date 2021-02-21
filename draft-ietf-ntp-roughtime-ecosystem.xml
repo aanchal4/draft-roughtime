@@ -90,6 +90,7 @@
       <t> The more distinct servers and responses that are mutually consistent
       except for the questionable response, the more likey a failure of the generator of the
       errneous response is.</t>
+    </section>
       <section title="Serialization of chains">
         <t> TODO</t>
       </section>
