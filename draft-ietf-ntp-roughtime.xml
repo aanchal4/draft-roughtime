@@ -895,8 +895,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         correct behavior.
       </t>
       <t>
-        Generating nonces without using a blind as described in
-        <xref target="cheater-detection"/> can cause leaks of private data or
+        Generating nonces in a nonrandom manner can cause leaks of private data or
         enable tracking of clients as they move between networks.
       </t>
     </section>
