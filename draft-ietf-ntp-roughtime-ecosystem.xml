@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-ecosystem-04" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-ecosystem-00" ipr="trust200902">
   <front>
     <title>Roughtime Ecosystem</title>
 
@@ -26,17 +26,21 @@
         <email>watsonbladd@gmail.com</email>
       </address>
     </author>
-
-    <author fullname="Marcus Dansarie" initials="M." surname="Dansarie">
-      <organization>Swedish Defense University  </organization>
-        <address>
-          <email>
-            marcus@dansarie.se
-          </email>
-        </address>
+       <author fullname="Marcus Dansarie" initials="M." surname="Dansarie">
+      <address>
+        <postal>
+          <street />
+          <city />
+          <region />
+          <code />
+          <country>Sweden</country>
+        </postal>
+        <email>marcus@dansarie.se</email>
+        <uri>https://orcid.org/0000-0001-9246-0263</uri>
+      </address>
     </author>
-    
-    <date year="2020" month="August" day="29"/>
+
+    <date year="2021" month="February" day="21"/>
 
     <area>General</area>
 

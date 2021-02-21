@@ -49,16 +49,20 @@
       </address>
     </author>
 
-    <author fullname="Marcus Dansarie" initials="M." surname="Dansarie">
-      <organization>Swedish Defense University  </organization>
-        <address>
-          <email>
-            marcus@dansarie.se
-          </email>
-        </address>
-    </author>
-    
-    <date year="2020" month="August" day="29"/>
+   <author fullname="Marcus Dansarie" initials="M." surname="Dansarie">
+      <address>
+        <postal>
+          <street />
+          <city />
+          <region />
+          <code />
+          <country>Sweden</country>
+        </postal>
+        <email>marcus@dansarie.se</email>
+        <uri>https://orcid.org/0000-0001-9246-0263</uri>
+      </address>
+    </author>    
+    <date year="2020" month="February" day="21"/>
 
     <area>General</area>
 
