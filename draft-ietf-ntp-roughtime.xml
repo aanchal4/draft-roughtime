@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-03" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-04" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -49,7 +49,20 @@
       </address>
     </author>
 
-    <date year="2020" month="August" day="29"/>
+   <author fullname="Marcus Dansarie" initials="M." surname="Dansarie">
+      <address>
+        <postal>
+          <street />
+          <city />
+          <region />
+          <code />
+          <country>Sweden</country>
+        </postal>
+        <email>marcus@dansarie.se</email>
+        <uri>https://orcid.org/0000-0001-9246-0263</uri>
+      </address>
+    </author>    
+    <date year="2020" month="February" day="21"/>
 
     <area>General</area>
 
@@ -103,9 +116,6 @@
       <t>
         Y** For security issues with Autokey Public Key Authentication, refer to
         <xref target="Autokey"/>.
-      </t>
-      <t>
-        More specifically,
       </t>
       <t>
         <list style="symbols">
@@ -185,33 +195,6 @@
         covering the nonce issued by the client. Provided that the nonce has
         sufficient entropy, this proves that the signed response could only have
         been generated after the nonce.
-      </t>
-      <t>
-        Chaining multiple servers: For subsequent requests, the client generates
-        a new nonce by hashing the reply from the previous server with a random
-        value (a blind). This proves that the nonce was created after the reply
-        from the previous server. It sends the new nonce in a request to the
-        next server and receives a response that includes a signature covering
-        the nonce.
-      </t>
-      <t>
-        Cryptographic proof of misbehavior: If the time from the second server
-        is before the first, then the client has proof that at least one of the
-        servers is misbehaving; the reply from the second server implicitly
-        shows that it was created later because of the way that the client
-        constructed the nonce. If the time from the second server is too far in
-        the future, the client can contact the first server again with a new
-        nonce generated from the second server's response and get a signature
-        that was provably created afterwards, but with an earlier timestamp.
-      </t>
-      <t>
-        With only two servers, the client can end up with proof that something
-        is wrong, but no idea what the correct time is. But with half a dozen or
-        more independent servers, the client will end up with chain of proof of
-        any server's misbehavior, signed by several others, and (presumably)
-        enough accurate replies to establish what the correct time is.
-        Furthermore, this proof may be validated by third parties ultimately
-        leading to a revocation of trust in the misbehaving server.
       </t>
     </section>
 
@@ -420,10 +403,7 @@
         </t>
         <t>
           The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
-          by hashing a previous Roughtime response message together with a blind
-          as described in <xref target="cheater-detection"/>. If no previous
-          responses are available to the client, the nonce SHOULD be generated at
-          random.
+          in a manner indistinguishable from random. 
         </t>
         <t>
           In a request, the VER tag contains a list of versions. The VER tag
@@ -666,37 +646,6 @@
         <t>Implementations MAY use other, more sophisticated means of
         adjusting the clock respecting Roughtime information.</t>
     </section>
-    <section title="Cheater Detection" anchor="cheater-detection">
-      <t>
-        A chain of responses is a series of responses where the SHA-512 hash of
-        the preceding response H, is concatenated with a 64 byte blind X, and
-        then SHA-512(H, X) is the nonce used in the subsequent response. These
-        may be represented as an array of objects in JavaScript Object Notation
-        (JSON) format <xref target="RFC8259"/> where each object may have keys
-        "blind" and "response_packet". Packet has the Base64
-        <xref target="RFC4648"/> encoded bytes of the packet and blind is the
-        Base64 encoded blind used for the next nonce. The last packet needs no
-        blind.
-      </t>
-      <t>
-        A pair of responses (r_1, r_2) is invalid if MIDP_1-RADI_1 &gt;
-        MIDP_2+RADI_2. A chain of longer length is invalid if for any i, j such
-        that i &lt; j, (r_i, r_j) is an invalid pair.
-      </t>
-      <t>
-        Invalidity of a chain is proof that causality has been violated if all
-        servers were reporting correct time. An invalid chain where all
-        individual responses are valid is cryptographic proof of malfeasance of
-        at least one server: if all servers had the correct time in the chain,
-        causality would imply that MIDP_1-RADI_1 &lt; MIDP_2+RADI_2.
-      </t>
-      <t>
-        In conducting the comparison of timestamps one must know the length of a
-        day and hence have historical leap second data for the days in question.
-        However if violations are greater then a second the loss of leap second
-        data doesn't impede their detection.
-      </t>
-    </section>
 
     <section title="Grease">
       <t>
@@ -734,33 +683,12 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         </figure>
       </t>
     </section>
-
-    <section title="Trust Anchors and Policies">
-      <t>
-        A trust anchor is any distributor of a list of trusted servers. It is
-        RECOMMENDED that trust anchors subscribe to a common public forum where
-        evidence of malfeasance may be shared and discussed. Trust anchors
-        SHOULD subscribe to a zero-tolerance policy: any generation of incorrect
-        timestamps will result in removal. To enable this trust anchors SHOULD
-        list a wide variety of servers so the removal of a server does not
-        result in operational issues for clients. Clients SHOULD attempt to
-        detect malfeasance and have a way to report it to trust anchors.
-      </t>
-      <t>
-        Because only a single Roughtime server is required for successful
-        synchronization, Roughtime does not have the incentive problems that
-        have prevented effective enforcement of discipline on the web PKI. We
-        expect that some clients will aggressively monitor server behavior.
-      </t>
-    </section>
-
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
-        Marcus Dansarie contributed many fruitful ideas. Thomas
-        Peterson corrected multiple nits. Peter L&ouml;thberg
-        (Lothberg), Tal Mizrahi, Ragnar Sundblad, Kristof Teichel, and
-        the other members of the NTP working group contributed
-        comments and suggestions.
+         Thomas Peterson corrected multiple nits. Peter L&ouml;thberg
+         (Lothberg), Tal Mizrahi, Ragnar Sundblad, Kristof Teichel,
+         and the other members of the NTP working group contributed
+         comments and suggestions.
       </t>
     </section>
 
@@ -967,8 +895,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
         correct behavior.
       </t>
       <t>
-        Generating nonces without using a blind as described in
-        <xref target="cheater-detection"/> can cause leaks of private data or
+        Generating nonces in a nonrandom manner can cause leaks of private data or
         enable tracking of clients as they move between networks.
       </t>
     </section>
