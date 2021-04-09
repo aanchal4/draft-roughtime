@@ -94,7 +94,7 @@
         behave correctly. Authenticating time servers prevents network
         adversaries from modifying time packets, but an authenticated time
         server still has full control over the contents of the time packet and
-        may go rogue. The Roughtime protocol provides cryptographic proof of
+        may transmit incorrect time. The Roughtime protocol provides cryptographic proof of
         malfeasance, enabling clients to detect and prove to a third party a
         server's attempts to influence the time a client computes.
       </t>
@@ -120,18 +120,18 @@
       <t>
         <list style="symbols">
           <t>
-            If a server's timestamps do not fit into the time context of other
-            servers' responses, then a Roughtime client can cryptographically
-            prove this misbehavior to third parties. This helps detect "bad"
+            If a server's timestamps do not fit into the time context
+            of other servers' responses, then a Roughtime client can
+            cryptographically prove this misbehavior to third
+            parties. This helps detect dishonest or malfunctioning
             servers.
           </t>
           <t>
-            A Roughtime client can roughly detect (with no absolute guarantee) a
-            delay attack <xref target="DelayAttacks"/> but can not
-            cryptographically prove this to a third party. However, the absence
-            of proof of malfeasance should not be considered a proof of absence
-            of malfeasance. So Roughtime should not be used as a witness that a
-            server is overall "good".
+            A Roughtime client can roughly detect (with no absolute
+            guarantee) a delay attack <xref target="DelayAttacks"/>
+            but can not cryptographically prove this to a third
+            party. However such attacks expand the round trip time
+            between request and response.
           </t>
           <t>
             Note that delay attacks cannot be detected/stopped by any protocol.
@@ -139,17 +139,18 @@
             provided by Roughtime.
           </t>
           <t>
-            Although delay attacks cannot be prevented, they can be limited to
-            a predetermined upper bound. This can be done by defining a
-            maximal tolerable Round Trip Time (RTT) value, MAX-RTT, that a
-            Roughtime client is willing to accept. A Roughtime client can
-            measure the RTT of every request-response handshake and compare it
-            to MAX-RTT. If the RTT exceeds MAX-RTT, the corresponding server
-            is assumed to be a falseticker. When this approach is used the
-            maximal time error that can be caused by a delay attack is
-            MAX-RTT/2. It should be noted that this approach assumes that the
-            nature of the system is known to the client, including reasonable
-            upper bounds on the RTT value.
+            Although delay attacks cannot be prevented, they can be
+            limited to a predetermined upper bound. This can be done
+            by defining a maximal tolerable Round Trip Time (RTT)
+            value, MAX-RTT, that a Roughtime client is willing to
+            accept. A Roughtime client can measure the RTT of every
+            request-response handshake and compare it to MAX-RTT. If
+            the RTT exceeds MAX-RTT, the corresponding measurement is
+            discarded.  When this approach is used the maximal time
+            error that can be caused by a delay attack is
+            MAX-RTT/2. It should be noted that this approach assumes
+            that the nature of the system is known to the client,
+            including reasonable upper bounds on the RTT value.
           </t>
         </list>
       </t>
@@ -167,17 +168,17 @@
 
     <section title="Protocol Overview" anchor="protocol-overview">
       <t>
-        Roughtime is a protocol for rough time synchronization that enables
-        clients to provide cryptographic proof of server malfeasance. It does so
-        by having responses from servers include a signature with a certificate
-        rooted in a long-term public/private key pair over a value derived from
-        a nonce provided by the client in its request. This provides
-        cryptographic proof that the timestamp was issued after the server
-        received the client's request. The derived value included in the
-        server's response is the root of a Merkle tree which includes the hash
-        of the client's nonce as the value of one of its leaf nodes. This
-        enables the server to amortize the relatively costly signing operation
-        over a number of client requests.
+        Roughtime is a protocol for rough time synchronization that
+        enables clients to provide cryptographic proof of server
+        malfeasance. It does so by having responses from servers
+        include a signature over a value derived from a nonce in the
+        client request. This provides cryptographic proof that the
+        timestamp was issued after the server received the client's
+        request. The derived value included in the server's response
+        is the root of a Merkle tree which includes the hash of the
+        client's nonce as the value of one of its leaf nodes. This
+        enables the server to amortize the relatively costly signing
+        operation over a number of client requests.
       </t>
       <t>
         Single server mode: At its most basic level, Roughtime is a one round
@@ -251,17 +252,18 @@
 .                                                               .
 |                                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]>
-        </artwork>
+      </artwork>
       </figure>
 
       <section title="Data Types" anchor="format">
         <section title="int32">
           <t>
             An int32 is a 32 bit signed integer. It is serialized in
-            sign-magnitude representation with the sign bit in the most
-            significant bit. It is serialized least significant byte first. The
-            negative zero value (0x80000000) MUST NOT be used.
-          </t>
+            sign-magnitude representation with the sign bit in the
+            most significant bit. It is serialized least significant
+            byte first. The negative zero value (0x80000000) MUST NOT
+            be used and any message with it is syntactically invalid
+            and MUST be ignored.  </t>
         </section>
         <section title="uint32">
           <t>
@@ -279,13 +281,16 @@
 
         <section title="Tag" anchor="tag">
           <t>
-            Tags are used to identify values in Roughtime messages. A tag is a
-            uint32 but may also be listed as a sequence of up to four ASCII
-            characters <xref target="RFC0020"/>. ASCII strings shorter than four
-            characters can be unambiguously converted to tags by padding them
-            with zero bytes. For example, the ASCII string "NONC" would
-            correspond to the tag 0x434e4f4e and "PAD" would correspond to
-            0x00444150.
+            Tags are used to identify values in Roughtime messages. A
+            tag is a uint32 but may also be listed in this document as
+            a sequence of up to four ASCII characters <xref
+            target="RFC0020"/>. ASCII strings shorter than four
+            characters can be unambiguously converted to tags by
+            padding them with zero bytes. For example, the ASCII
+            string "NONC" would correspond to the tag 0x434e4f4e and
+            "PAD" would correspond to 0x00444150. Note that when
+            encoded into a message the ASCII values will be in the
+            corresponding order.
           </t>
         </section>
 
@@ -294,8 +299,7 @@
             A timestamp is a uint64 interpreted in the following way. The most
             significant 3 bytes contain the integer part of a Modified Julian
             Date (MJD). The least significant 5 bytes is a count of the number
-            of Coordinated Universal Time (UTC) microseconds
-            <xref target="ITU-R_TF.460-6"/> since midnight on that day.
+            of microseconds since midnight on that day.
           </t>
           <t>
             The MJD is the number of UTC days since 17 November 1858
@@ -402,7 +406,7 @@
           A request MUST contain the tags NONC and VER.
         </t>
         <t>
-          The value of the NONC tag is a 64 byte nonce. It SHOULD be generated
+          The value of the NONC tag is a 32 byte nonce. It SHOULD be generated
           in a manner indistinguishable from random. 
         </t>
         <t>
@@ -413,7 +417,10 @@
           contents.
         </t>
         <t>
-          Tags other than NONC and VER SHOULD be ignored by the server.
+          Tags other than NONC and VER SHOULD be ignored by the
+          server. A future version of this protocol may mandate
+          additional tags in the message and asign them semantic
+          meaning.
         </t>
         <t>
           The size of the request message SHOULD be at least 1024 bytes when
@@ -422,7 +429,7 @@
           Responding to requests shorter than 1024 bytes is OPTIONAL and
           servers MUST NOT send responses larger than the requests they are
           replying to.
-        </t>
+      </t>
       </section>
 
       <section title="Responses">
@@ -432,7 +439,7 @@
         </t>
         <t>
           The SIG tag is a signature over the SREP value using the
-          public key contained in CERT, as explained below.
+          public key contained in CERT, generated as explained below.
         </t>
         <t>
           The SREP tag contains a time response. Its value is a
@@ -451,10 +458,10 @@
           The MIDP tag value is a timestamp of the moment of processing.
         </t>
         <t>
-          The RADI tag value is a uint32 representing the server's estimate of
-          the accuracy of MIDP in microseconds. Servers MUST ensure that the
-          true time is within (MIDP-RADI, MIDP+RADI) at the time they compose
-          the response message.
+          The RADI tag value is a uint32 representing the server's
+          estimate of the accuracy of MIDP in microseconds. Servers
+          MUST ensure that the true time is within (MIDP-RADI,
+          MIDP+RADI) at the time they transmit the response message.
         </t>
         <t>
           The DUT1 tag value is an int32 indicating the predicted difference
@@ -468,16 +475,28 @@
           Circular T.
         </t>
         <t>
-          The LEAP tag contains zero or more int32 values, each representing
-          a past or future leap second event. Positive values represent the
-          addition of a second and negative values represent the removal of a
-          second. The absolute value represents the MJD of the second after the
-          leap second event, i.e., the first second with a new UTC - TAI
-          difference. The leap second events MUST be sorted in reverse
-          chronological order and the first item MUST be the last (past or
-          future) leap second event that the server knows about. A LEAP tag with
-          zero int32 values indicates that the server does not hold any updated
-          leap second information.
+          The LEAP tag contains zero or more int32 values, each
+          representing a past or future leap second event. Positive
+          values represent the addition of a second and negative
+          values represent the removal of a second. The absolute value
+          represents the MJD of the day that begins immediately after  the leap
+          second event.
+       </t>
+       <t> 
+         By way of illustration there was a leap second 31 December
+         2016 23:59:60. This event would be represented by the tag
+         with numeric value 57754. The positive sign represents that
+         there was an additional second inserted, the numeric value
+         indicates 1 January 2017, the following day that began at
+         midnight after the addition.
+       </t>
+       <t>
+         The leap second events MUST be sorted in
+         reverse chronological order and the first item MUST be the
+         last (past or future) leap second event that the server
+         knows about. A LEAP tag with zero int32 values indicates
+         that the server does not hold any updated leap second
+         information.
         </t>
         <t>
           The SIG tag value is a 64 byte Ed25519 signature
@@ -562,33 +581,31 @@
           response.
         </t>
         <t>
-          The values of all sibling nodes in the path between a request's nonce
-          node and the root node is stored in the PATH tag so that the client
-          can reconstruct and validate the value in the ROOT tag using its
-          nonce.
+          The values of all sibling nodes in the path between a
+          request's nonce node and the root node is stored in the PATH
+          tag so that the client can reconstruct and validate the
+          value in the ROOT tag using its nonce. These values are each
+          32 bytes and are stored one after the other with no
+          additional padding or structure.  The order in which they
+          are stored is described in <xref target="root-check"/>
         </t>
-
         <section title="Root Value Validity Check Algorithm"
             anchor="root-check">
-          <t>
-            One starts by computing the hash of the NONC value from the request,
-            with 0x00 prepended. Then one walks from the least significant bit
-            of INDX to the most significant bit, and also walks towards the end
-            of PATH.
+          <t> 
+            We describe how to compute the hash of the Merkel tree from the 
+            values in the tags PATH, INDX and NONC. Our algorithm maintains a 
+            current hash value.  The bits of INDX are ordered from least to most 
+            significant in this algorithm. 
           </t>
-          <t>
-            If PATH ends then the remaining bits of the INDX MUST be all zero.
-            This indicates the termination of the walk, and the current value
-            MUST equal ROOT if the response is valid.
-          </t>
-          <t>
-            If the current bit is 0, one hashes 0x01, the current hash, and the
-            value from PATH to derive the next current value.
-          </t>
-          <t>
-            If the current bit is 1 one hashes 0x01, the value from PATH, and
-            the current hash to derive the next current value.
-          </t>
+         <t> At initialization hash is set to H( 0x00 || nonce). </t>
+         <t> If no more entries remain in PATH the current hash 
+             is the hash of the Merkel tree.
+            All remaining bits of INDX must be zero.
+         </t>
+         <t> Otherwise let node be the next 32 bytes in PATH. If the 
+            current bit in INDX is 0 then hash = H(0x01 || node || hash), 
+          else hash = H( 0x01 || hash || node).
+        </t>
         </section>
       </section>
 
@@ -619,7 +636,7 @@
 
           A response that passes these checks is said to be valid. Validity of a
           response does not prove the time is correct, but merely that the
-          server signed it, and thus guarantees that it began to compute the
+          server signed it, and thus promises  that it began to compute the
           signature at a time in the interval (MIDP-RADI, MIDP+RADI).
         </t>
       </section>
@@ -644,7 +661,8 @@
         implementation defined.</t>
 
         <t>Implementations MAY use other, more sophisticated means of
-        adjusting the clock respecting Roughtime information.</t>
+        adjusting the clock respecting Roughtime information. Other applications
+        such as X509 verification may wish to </t>
     </section>
 
     <section title="Grease">
@@ -658,6 +676,7 @@
     </section>
 
     <section title="Roughtime Servers">
+      <t> NOTE TO RFC EDITOR: remove this section before publication. </t>
       <t>
         The below list contains a list of servers with their public keys in
         Base64 format. These servers may implement older versions of this
