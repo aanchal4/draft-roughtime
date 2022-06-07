@@ -36,15 +36,8 @@
     </author>
 
     <author fullname="Watson Ladd" initials="W." surname="Ladd">
-      <organization> Cloudflare</organization>
+      <organization> Sealance, Inc.</organization>
       <address>
-        <postal>
-          <street>101 Townsend St</street>
-          <city>San Francisco</city>
-          <region>CA</region>
-          <code>94107</code>
-          <country>USA</country>
-        </postal>
         <email>watsonbladd@gmail.com</email>
       </address>
     </author>
