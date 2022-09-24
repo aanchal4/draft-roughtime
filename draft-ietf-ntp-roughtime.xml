@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-06" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-07" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -48,7 +48,7 @@
         <uri>https://orcid.org/0000-0001-9246-0263</uri>
       </address>
     </author>
-    <date year="2022" month="June" day="07"/>
+    <date year="2022" month="September" day="26"/>
 
     <area>General</area>
 
@@ -177,7 +177,7 @@
         protocol in which a completely fresh client requests the current time
         and the server sends a signed response. The response includes a
         timestamp and a radius used to indicate the server's certainty about the
-        reported time. For example, a radius of 1,000,000 microseconds means the
+        reported time. For example, a radius of 1,000 milliseconds means the
         server is absolutely confident that the true time is within one second
         of the reported time.
       </t>
@@ -289,7 +289,7 @@
             A timestamp is a uint64 interpreted in the following way. The most
             significant 3 bytes contain the integer part of a Modified Julian
             Date (MJD). The least significant 5 bytes is a count of the number
-            of microseconds since midnight on that day.
+            of milliseconds since midnight on that day.
           </t>
           <t>
             The MJD is the number of UTC days since 17 November 1858
@@ -299,8 +299,8 @@
           <t>
             Note that, unlike NTP, this representation does not use the full
             number of bits in the fractional part and that days with leap
-            seconds will have more or fewer than the nominal 86,400,000,000
-            microseconds.
+            seconds will have more or fewer than the nominal 86,400,000
+            milliseconds.
           </t>
         </section>
       </section>
@@ -319,7 +319,7 @@
           offset array is considered to have a not explicitly encoded value of 0
           as its zeroth entry. The value associated with the ith tag begins at
           offset[i] and ends at offset[i+1]-1, with the exception of the last
-          value which ends at the end of the message. Values may have zero
+          value which ends at the end of the message. Values MAY have zero
           length.
         </t>
         <t>
@@ -470,9 +470,11 @@
         <section title="SREP">
           <t>
             The SREP tag contains a time response. Its value MUST be a
-            Roughtime message with the tags ROOT, MIDP, and RADI. The server MAY
-            include any of the tags DUT1, DTAI, and LEAP in the contents of the
-            SREP tag.
+            Roughtime message with the tags ROOT, MIDP, and RADI. If the server
+            has updated UT1, TAI, or leap second information, it MAY include any
+            of the tags DUT1, DTAI, and LEAP in the contents of the SREP tag.
+            The absence of any of those tags indicates that the server does not
+            hold such information.
           </t>
           <t>
             The ROOT tag MUST contain a 32 byte value of a Merkle tree root as
@@ -483,7 +485,7 @@
           </t>
           <t>
             The RADI tag value MUST be a uint32 representing the server's
-            estimate of the accuracy of MIDP in microseconds. Servers MUST
+            estimate of the accuracy of MIDP in milliseconds. Servers MUST
             ensure that the true time is within (MIDP-RADI, MIDP+RADI) at the
             time they transmit the response message.
           </t>
@@ -500,26 +502,22 @@
             of Weights and Measures' (BIPM) Circular T.
           </t>
           <t>
-            The LEAP tag MUST contain zero or more int32 values, each
+            The LEAP tag MUST contain one or more int32 values, each
             representing a past or future leap second event. Positive values
             represent the addition of a second and negative values represent the
             removal of a second. The absolute value represents the MJD of the
-            day that begins immediately after the leap second event.
+            day that begins immediately after the leap second event. The leap
+            second events MUST be sorted in reverse chronological order and the
+            first item MUST be the last (past or future) leap second event that
+            the server knows about.
          </t>
          <t>
            By way of illustration, there was a leap second 31 December 2016
-           23:59:60. This event would be represented by the tag with numeric
-           value 57754. The positive sign represents that there was an
+           23:59:60. This event would be represented by a LEAP tag containing
+           the int32 value 57754. The positive sign represents that there was an
            additional second inserted, the numeric value indicates 1 January
-           2017, the following day that began at midnight after the addition.
+           2017, the day that began at midnight following the addition.
          </t>
-         <t>
-           The leap second events MUST be sorted in reverse chronological order
-           and the first item MUST be the last (past or future) leap second
-           event that the server knows about. A LEAP tag with zero int32 values
-           indicates that the server does not hold any updated leap second
-           information.
-          </t>
         </section>
         <section title="CERT">
           <t>
@@ -527,7 +525,7 @@
             server's long-term key. Its value is a Roughtime message with the
             tags DELE and SIG, where SIG is a signature over the DELE value. The
             context string used to generate SIG MUST be "RoughTime v1 delegation
-            signature--".
+            signature".
           </t>
           <t>
             The DELE tag contains a delegated public-key certificate used by the
@@ -573,11 +571,11 @@
         </t>
         <t>
           The values of all nodes are calculated from the leaf nodes and up
-          towards the root node using the first 32 bytes of the output of the
-          SHA-512 hash algorithm <xref target="SHS"/>. For leaf nodes, the
-          byte 0x00 is prepended to the nonce before applying the hash function.
-          For all other nodes, the byte 0x01 is concatenated with first the left
-          and then the right child node value before applying the hash function.
+          towards the root node using the output of the SHA-512/256 hash
+          algorithm <xref target="SHS"/>. For leaf nodes, the byte 0x00 is
+          prepended to the nonce before applying the hash function. For all
+          other nodes, the byte 0x01 is concatenated with first the left and
+          then the right child node value before applying the hash function.
         </t>
         <t>
           The value of the Merkle tree's root node is included in the ROOT tag
@@ -697,17 +695,21 @@ address:       roughtime.cloudflare.com
 port:          2002
 long-term key: gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=
 
+address:       roughtime.dnov.se
+port:          2002
+long-term key: hlKAFAeU+xDZ1+9eVgrXel+m3sRiSlzoqCsqL9WoRB0=
+
 address:       roughtime.int08h.com
 port:          2002
 long-term key: AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=
 
-address:       roughtime.sandbox.google.com
-port:          2002
-long-term key: etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=
-
 address:       roughtime.se
 port:          2002
 long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
+
+address:       time.0xt.ca
+port:          2002
+long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
           </artwork>
         </figure>
       </t>
@@ -1036,7 +1038,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.0020.xml"?>
       <?rfc include='reference.RFC.6335.xml'?>
       <?rfc include="reference.RFC.8032.xml"?>
-      <?rfc include="reference.RFC.8259.xml"?>
     </references>
     <references title="Informative References">
       <?rfc include="reference.RFC.0768.xml"?>
@@ -1102,8 +1103,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <t hangText="ASCII ">American Standard Code for Information
               Interchange</t>
           <t hangText="IANA  ">Internet Assigned Numbers Authority</t>
-          <t hangText="JSON  "><xref target="RFC8259">JavaScript Object
-              Notation</xref></t>
           <t hangText="MJD   ">Modified Julian Date</t>
           <t hangText="NTP   "><xref target="RFC5905">Network Time Protocol
               </xref></t>
