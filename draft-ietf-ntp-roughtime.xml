@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-06" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-07" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -48,7 +48,7 @@
         <uri>https://orcid.org/0000-0001-9246-0263</uri>
       </address>
     </author>
-    <date year="2022" month="June" day="07"/>
+    <date year="2022" month="September" day="26"/>
 
     <area>General</area>
 
@@ -279,8 +279,7 @@
             shorter than four characters can be unambiguously converted to tags
             by padding them with zero bytes. For example, the ASCII string
             "NONC" would correspond to the tag 0x434e4f4e and "PAD" would
-            correspond to 0x00444150. Note that when encoded into a message the
-            ASCII values will be in the corresponding order.
+            correspond to 0x00444150.
           </t>
         </section>
 
@@ -289,7 +288,8 @@
             A timestamp is a uint64 interpreted in the following way. The most
             significant 3 bytes contain the integer part of a Modified Julian
             Date (MJD). The least significant 5 bytes is a count of the number
-            of microseconds since midnight on that day.
+            of Coordinated Universal Time (UTC) <xref target="ITU-R_TF.460-6"/>
+            microseconds since midnight on that day.
           </t>
           <t>
             The MJD is the number of UTC days since 17 November 1858
@@ -319,7 +319,7 @@
           offset array is considered to have a not explicitly encoded value of 0
           as its zeroth entry. The value associated with the ith tag begins at
           offset[i] and ends at offset[i+1]-1, with the exception of the last
-          value which ends at the end of the message. Values may have zero
+          value which ends at the end of the message. Values MAY have zero
           length.
         </t>
         <t>
@@ -396,7 +396,7 @@
         <t>
           A request MUST contain the tags VER and NONC. Tags other than NONC and
           VER SHOULD be ignored by the server. A future version of this protocol
-          may mandate additional tags in the message and asign them semantic
+          may mandate additional tags in the message and assign them semantic
           meaning.
         </t>
         <t>
@@ -470,9 +470,11 @@
         <section title="SREP">
           <t>
             The SREP tag contains a time response. Its value MUST be a
-            Roughtime message with the tags ROOT, MIDP, and RADI. The server MAY
-            include any of the tags DUT1, DTAI, and LEAP in the contents of the
-            SREP tag.
+            Roughtime message with the tags ROOT, MIDP, and RADI. If the server
+            has updated UT1, TAI, or leap second information, it MAY include any
+            of the tags DUT1, DTAI, and LEAP in the contents of the SREP tag.
+            The absence of any of those tags indicates that the server does not
+            hold such information.
           </t>
           <t>
             The ROOT tag MUST contain a 32 byte value of a Merkle tree root as
@@ -489,37 +491,33 @@
           </t>
           <t>
             The DUT1 tag value MUST be an int32 indicating the predicted
-            difference between UT1 and UTC (UT1 - UTC) in milliseconds as given
-            by the International Earth Rotation and Reference Systems Service
-            (IERS).
+            difference between UT1 and UTC (UT1 - UTC) in microseconds at the
+            time indicated by MIDP, as given by the International Earth Rotation
+            and Reference Systems Service (IERS).
           </t>
           <t>
             The DTAI tag value MUST be an int32 indicating the current
             difference between International Atomic Time (TAI) and UTC
-            (TAI - UTC) in milliseconds as published in the International Bureau
-            of Weights and Measures' (BIPM) Circular T.
+            (TAI - UTC) in seconds as published in the International Bureau of
+            Weights and Measures' (BIPM) Circular T.
           </t>
           <t>
-            The LEAP tag MUST contain zero or more int32 values, each
+            The LEAP tag MUST contain one or more int32 values, each
             representing a past or future leap second event. Positive values
             represent the addition of a second and negative values represent the
             removal of a second. The absolute value represents the MJD of the
-            day that begins immediately after the leap second event.
+            day that begins immediately after the leap second event. The leap
+            second events MUST be sorted in reverse chronological order and the
+            first item MUST be the last (past or future) leap second event that
+            the server knows about.
          </t>
          <t>
            By way of illustration, there was a leap second 31 December 2016
-           23:59:60. This event would be represented by the tag with numeric
-           value 57754. The positive sign represents that there was an
+           23:59:60. This event would be represented by a LEAP tag containing
+           the int32 value 57754. The positive sign represents that there was an
            additional second inserted, the numeric value indicates 1 January
-           2017, the following day that began at midnight after the addition.
+           2017, the day that began at midnight following the addition.
          </t>
-         <t>
-           The leap second events MUST be sorted in reverse chronological order
-           and the first item MUST be the last (past or future) leap second
-           event that the server knows about. A LEAP tag with zero int32 values
-           indicates that the server does not hold any updated leap second
-           information.
-          </t>
         </section>
         <section title="CERT">
           <t>
@@ -527,7 +525,7 @@
             server's long-term key. Its value is a Roughtime message with the
             tags DELE and SIG, where SIG is a signature over the DELE value. The
             context string used to generate SIG MUST be "RoughTime v1 delegation
-            signature--".
+            signature".
           </t>
           <t>
             The DELE tag contains a delegated public-key certificate used by the
@@ -573,11 +571,11 @@
         </t>
         <t>
           The values of all nodes are calculated from the leaf nodes and up
-          towards the root node using the first 32 bytes of the output of the
-          SHA-512 hash algorithm <xref target="SHS"/>. For leaf nodes, the
-          byte 0x00 is prepended to the nonce before applying the hash function.
-          For all other nodes, the byte 0x01 is concatenated with first the left
-          and then the right child node value before applying the hash function.
+          towards the root node using the output of the SHA-512/256 hash
+          algorithm <xref target="SHS"/>. For leaf nodes, the byte 0x00 is
+          prepended to the nonce before applying the hash function. For all
+          other nodes, the byte 0x01 is concatenated with first the left and
+          then the right child node value before applying the hash function.
         </t>
         <t>
           The value of the Merkle tree's root node is included in the ROOT tag
@@ -596,31 +594,12 @@
           additional padding or structure.  The order in which they
           are stored is described in <xref target="root-check"/>
         </t>
-        <section title="Root Value Validity Check Algorithm"
-            anchor="root-check">
-          <t>
-            We describe how to compute the hash of the Merkel tree from the
-            values in the tags PATH, INDX, and NONC. Our algorithm maintains a
-            current hash value.  The bits of INDX are ordered from least to most
-            significant in this algorithm.
-          </t>
-         <t> At initialization hash is set to H(0x00 || nonce). </t>
-         <t> If no more entries remain in PATH the current hash
-             is the hash of the Merkel tree.
-            All remaining bits of INDX must be zero.
-         </t>
-         <t> Otherwise let node be the next 32 bytes in PATH. If the
-            current bit in INDX is 0 then hash = H(0x01 || node || hash),
-          else hash = H(0x01 || hash || node).
-        </t>
-        </section>
       </section>
 
       <section title="Validity of Response">
         <t>
           A client MUST check the following properties when it receives a
-          response. We assume the long-term server public key is known to the
-          client through other means.
+          response.
 
           <list style="symbols">
             <t>
@@ -629,6 +608,10 @@
             </t>
             <t>
               The DELE timestamps and the MIDP value are consistent.
+            </t>
+            <t>
+              The value of NONC in the response is identical to the value of
+              NONC in the request.
             </t>
             <t>
               The INDX and PATH values prove NONC was included in the Merkle
@@ -646,6 +629,52 @@
           server signed it, and thus promises that it began to compute the
           signature at a time in the interval (MIDP-RADI, MIDP+RADI).
         </t>
+
+        <section title="Root Value Calculation Algorithm"
+            anchor="root-check">
+          <t>
+            When validating the response, the client independently computes the
+            hash of the Merkle tree from the values in the tags PATH, INDX, and
+            NONC. The bits of INDX are ordered from least to most significant in
+            this algorithm. In the following examples, || denotes concatenation.
+          </t>
+          <t>
+            At initialization, hash is set to SHA-512/256(0x00 || nonc).
+          </t>
+          <t>
+            If no more entries remain in PATH the current hash is the hash of
+            the Merkle tree, i.e. the value of ROOT. All remaining bits of INDX
+            must be zero at this point.
+          </t>
+          <t>
+            Otherwise, let node be the next 32 bytes in PATH. If the current bit
+            in INDX is 0 then hash = SHA-512/256(0x01 || node || hash), else
+            hash = SHA-512/256(0x01 || hash || node).
+          </t>
+          <t>
+            <xref target="fig-roughtime-calc-root"/> presents pseudocode for the
+            root value calculation algorithm.
+          </t>
+          <figure anchor="fig-roughtime-calc-root">
+            <name>Pseudocode for the Roughtime root value calculation algorithm.</name>
+            <sourcecode><![CDATA[
+function calc_root(path, indx, nonc):
+    if len(path) > 32:
+        throw error
+    hash = sha512-256(0x00 || nonc)
+    while len(path) > 0:
+        if indx & 1 == 0:
+            hash = sha512-256(0x01 || hash || path[0])
+        else:
+            hash = sha512-256(0x01 || path[0] || hash)
+        path = path[1:]
+        indx >>= 1
+    if indx != 0:
+        throw error
+    return hash]]>
+            </sourcecode>
+          </figure>
+        </section>
       </section>
     </section>
     <section title = "Integration Into NTP" anchor="ntp-integration">
@@ -697,17 +726,21 @@ address:       roughtime.cloudflare.com
 port:          2002
 long-term key: gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo=
 
+address:       roughtime.dnov.se
+port:          2002
+long-term key: hlKAFAeU+xDZ1+9eVgrXel+m3sRiSlzoqCsqL9WoRB0=
+
 address:       roughtime.int08h.com
 port:          2002
 long-term key: AW5uAoTSTDfG5NfY1bTh08GUnOqlRb+HVhbJ3ODJvsE=
 
-address:       roughtime.sandbox.google.com
-port:          2002
-long-term key: etPaaIxcBMY1oUeGpwvPMCJMwlRVNxv51KK/tktoJTQ=
-
 address:       roughtime.se
 port:          2002
 long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
+
+address:       time.0xt.ca
+port:          2002
+long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
           </artwork>
         </figure>
       </t>
@@ -931,6 +964,12 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               <td>INDX</td>
               <td>[[this memo]]</td>
             </tr>
+
+            <tr>
+              <td>0x80000000-0xffffffff</td>
+              <td>Reserved for Private or Experimental use</td>
+              <td>[[this memo]]</td>
+            </tr>
           </tbody>
         </table>
       </section>
@@ -960,29 +999,35 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       </t>
       <t>
         This protocol does not provide any confidentiality. Given the nature of
-        timestamps such impact is minor.
+        timestamps such impact is minor. <xref target="sec-privacy"/> discusses
+        the use of nonces generated from user-provided data.
       </t>
       <t>
-        The compromise of a PUBK's private
-        key, even past MAXT, is a problem as the private key can be used to sign
-        invalid times that are in the range MINT to MAXT, and thus violate the
-        good behavior guarantee of the server.
+        The compromise of a PUBK's private key, even past MAXT, is a problem as
+        the private key can be used to sign invalid times that are in the range
+        MINT to MAXT, and thus violate the good behavior guarantee of the
+        server.
       </t>
       <t>
-        Servers MUST NOT send response packets larger than the request packets
-        sent by clients, in order to prevent amplification attacks.
+        Servers MUST NOT send UDP response packets larger than the request
+        packets sent by clients, in order to prevent amplification attacks.
       </t>
     </section>
 
-    <section title="Privacy Considerations">
+    <section title="Privacy Considerations" anchor="sec-privacy">
       <t>
         This protocol is designed to obscure all client identifiers. Servers
         necessarily have persistent long-term identities essential to enforcing
         correct behavior.
       </t>
       <t>
-        Generating nonces in a nonrandom manner can cause leaks of private data
-        or enable tracking of clients as they move between networks.
+        Nonces are transmitted in the clear. For that reason, generating nonces
+        in a nonrandom manner can cause leaks of private data or enable tracking
+        of clients as they move between networks. Particular attention must be
+        given when nonces are generated by hashing user-provided data. This may,
+        for example, happen in timestamping applications. In such cases, the
+        data SHOULD be blinded by concatenating it with a securely generated
+        random string before the hash function is applied.
       </t>
     </section>
   </middle>
@@ -1036,12 +1081,10 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.0020.xml"?>
       <?rfc include='reference.RFC.6335.xml'?>
       <?rfc include="reference.RFC.8032.xml"?>
-      <?rfc include="reference.RFC.8259.xml"?>
     </references>
     <references title="Informative References">
       <?rfc include="reference.RFC.0768.xml"?>
       <?rfc include='reference.RFC.0791.xml'?>
-      <?rfc include="reference.RFC.0793.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.4086.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
@@ -1049,6 +1092,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
       <?rfc include="reference.RFC.8915.xml"?>
+      <?rfc include="reference.RFC.9293.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
@@ -1102,8 +1146,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
           <t hangText="ASCII ">American Standard Code for Information
               Interchange</t>
           <t hangText="IANA  ">Internet Assigned Numbers Authority</t>
-          <t hangText="JSON  "><xref target="RFC8259">JavaScript Object
-              Notation</xref></t>
           <t hangText="MJD   ">Modified Julian Date</t>
           <t hangText="NTP   "><xref target="RFC5905">Network Time Protocol
               </xref></t>
@@ -1111,7 +1153,7 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
               Network Time Security</xref></t>
           <t hangText="TAI   "><xref target="ITU-R_TF.460-6">International
               Atomic Time (Temps Atomique International)</xref></t>
-          <t hangText="TCP   "><xref target="RFC0793">Transmission Control
+          <t hangText="TCP   "><xref target="RFC9293">Transmission Control
               Protocol</xref></t>
           <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
               </xref></t>
