@@ -177,7 +177,7 @@
         protocol in which a completely fresh client requests the current time
         and the server sends a signed response. The response includes a
         timestamp and a radius used to indicate the server's certainty about the
-        reported time. For example, a radius of 1,000 milliseconds means the
+        reported time. For example, a radius of 1,000,000 microseconds means the
         server is absolutely confident that the true time is within one second
         of the reported time.
       </t>
@@ -279,8 +279,7 @@
             shorter than four characters can be unambiguously converted to tags
             by padding them with zero bytes. For example, the ASCII string
             "NONC" would correspond to the tag 0x434e4f4e and "PAD" would
-            correspond to 0x00444150. Note that when encoded into a message the
-            ASCII values will be in the corresponding order.
+            correspond to 0x00444150.
           </t>
         </section>
 
@@ -289,7 +288,8 @@
             A timestamp is a uint64 interpreted in the following way. The most
             significant 3 bytes contain the integer part of a Modified Julian
             Date (MJD). The least significant 5 bytes is a count of the number
-            of milliseconds since midnight on that day.
+            of Coordinated Universal Time (UTC) <xref target="ITU-R_TF.460-6"/>
+            microseconds since midnight on that day.
           </t>
           <t>
             The MJD is the number of UTC days since 17 November 1858
@@ -299,8 +299,8 @@
           <t>
             Note that, unlike NTP, this representation does not use the full
             number of bits in the fractional part and that days with leap
-            seconds will have more or fewer than the nominal 86,400,000
-            milliseconds.
+            seconds will have more or fewer than the nominal 86,400,000,000
+            microseconds.
           </t>
         </section>
       </section>
@@ -396,7 +396,7 @@
         <t>
           A request MUST contain the tags VER and NONC. Tags other than NONC and
           VER SHOULD be ignored by the server. A future version of this protocol
-          may mandate additional tags in the message and asign them semantic
+          may mandate additional tags in the message and assign them semantic
           meaning.
         </t>
         <t>
@@ -485,21 +485,21 @@
           </t>
           <t>
             The RADI tag value MUST be a uint32 representing the server's
-            estimate of the accuracy of MIDP in milliseconds. Servers MUST
+            estimate of the accuracy of MIDP in microseconds. Servers MUST
             ensure that the true time is within (MIDP-RADI, MIDP+RADI) at the
             time they transmit the response message.
           </t>
           <t>
             The DUT1 tag value MUST be an int32 indicating the predicted
-            difference between UT1 and UTC (UT1 - UTC) in milliseconds as given
-            by the International Earth Rotation and Reference Systems Service
-            (IERS).
+            difference between UT1 and UTC (UT1 - UTC) in microseconds at the
+            time indicated by MIDP, as given by the International Earth Rotation
+            and Reference Systems Service (IERS).
           </t>
           <t>
             The DTAI tag value MUST be an int32 indicating the current
             difference between International Atomic Time (TAI) and UTC
-            (TAI - UTC) in milliseconds as published in the International Bureau
-            of Weights and Measures' (BIPM) Circular T.
+            (TAI - UTC) in seconds as published in the International Bureau of
+            Weights and Measures' (BIPM) Circular T.
           </t>
           <t>
             The LEAP tag MUST contain one or more int32 values, each
@@ -594,31 +594,12 @@
           additional padding or structure.  The order in which they
           are stored is described in <xref target="root-check"/>
         </t>
-        <section title="Root Value Validity Check Algorithm"
-            anchor="root-check">
-          <t>
-            We describe how to compute the hash of the Merkel tree from the
-            values in the tags PATH, INDX, and NONC. Our algorithm maintains a
-            current hash value.  The bits of INDX are ordered from least to most
-            significant in this algorithm.
-          </t>
-         <t> At initialization hash is set to H(0x00 || nonce). </t>
-         <t> If no more entries remain in PATH the current hash
-             is the hash of the Merkel tree.
-            All remaining bits of INDX must be zero.
-         </t>
-         <t> Otherwise let node be the next 32 bytes in PATH. If the
-            current bit in INDX is 0 then hash = H(0x01 || node || hash),
-          else hash = H(0x01 || hash || node).
-        </t>
-        </section>
       </section>
 
       <section title="Validity of Response">
         <t>
           A client MUST check the following properties when it receives a
-          response. We assume the long-term server public key is known to the
-          client through other means.
+          response.
 
           <list style="symbols">
             <t>
@@ -627,6 +608,10 @@
             </t>
             <t>
               The DELE timestamps and the MIDP value are consistent.
+            </t>
+            <t>
+              The value of NONC in the response is identical to the value of
+              NONC in the request.
             </t>
             <t>
               The INDX and PATH values prove NONC was included in the Merkle
@@ -644,6 +629,52 @@
           server signed it, and thus promises that it began to compute the
           signature at a time in the interval (MIDP-RADI, MIDP+RADI).
         </t>
+
+        <section title="Root Value Calculation Algorithm"
+            anchor="root-check">
+          <t>
+            When validating the response, the client independently computes the
+            hash of the Merkle tree from the values in the tags PATH, INDX, and
+            NONC. The bits of INDX are ordered from least to most significant in
+            this algorithm. In the following examples, || denotes concatenation.
+          </t>
+          <t>
+            At initialization, hash is set to SHA-512/256(0x00 || nonc).
+          </t>
+          <t>
+            If no more entries remain in PATH the current hash is the hash of
+            the Merkle tree, i.e. the value of ROOT. All remaining bits of INDX
+            must be zero at this point.
+          </t>
+          <t>
+            Otherwise, let node be the next 32 bytes in PATH. If the current bit
+            in INDX is 0 then hash = SHA-512/256(0x01 || node || hash), else
+            hash = SHA-512/256(0x01 || hash || node).
+          </t>
+          <t>
+            <xref target="fig-roughtime-calc-root"/> presents pseudocode for the
+            root value calculation algorithm.
+          </t>
+          <figure anchor="fig-roughtime-calc-root">
+            <name>Pseudocode for the Roughtime root value calculation algorithm.</name>
+            <sourcecode><![CDATA[
+function calc_root(path, indx, nonc):
+    if len(path) > 32:
+        throw error
+    hash = sha512-256(0x00 || nonc)
+    while len(path) > 0:
+        if indx & 1 == 0:
+            hash = sha512-256(0x01 || hash || path[0])
+        else:
+            hash = sha512-256(0x01 || path[0] || hash)
+        path = path[1:]
+        indx >>= 1
+    if indx != 0:
+        throw error
+    return hash]]>
+            </sourcecode>
+          </figure>
+        </section>
       </section>
     </section>
     <section title = "Integration Into NTP" anchor="ntp-integration">
@@ -933,6 +964,12 @@ long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
               <td>INDX</td>
               <td>[[this memo]]</td>
             </tr>
+
+            <tr>
+              <td>0x80000000-0xffffffff</td>
+              <td>Reserved for Private or Experimental use</td>
+              <td>[[this memo]]</td>
+            </tr>
           </tbody>
         </table>
       </section>
@@ -962,29 +999,35 @@ long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
       </t>
       <t>
         This protocol does not provide any confidentiality. Given the nature of
-        timestamps such impact is minor.
+        timestamps such impact is minor. <xref target="sec-privacy"/> discusses
+        the use of nonces generated from user-provided data.
       </t>
       <t>
-        The compromise of a PUBK's private
-        key, even past MAXT, is a problem as the private key can be used to sign
-        invalid times that are in the range MINT to MAXT, and thus violate the
-        good behavior guarantee of the server.
+        The compromise of a PUBK's private key, even past MAXT, is a problem as
+        the private key can be used to sign invalid times that are in the range
+        MINT to MAXT, and thus violate the good behavior guarantee of the
+        server.
       </t>
       <t>
-        Servers MUST NOT send response packets larger than the request packets
-        sent by clients, in order to prevent amplification attacks.
+        Servers MUST NOT send UDP response packets larger than the request
+        packets sent by clients, in order to prevent amplification attacks.
       </t>
     </section>
 
-    <section title="Privacy Considerations">
+    <section title="Privacy Considerations" anchor="sec-privacy">
       <t>
         This protocol is designed to obscure all client identifiers. Servers
         necessarily have persistent long-term identities essential to enforcing
         correct behavior.
       </t>
       <t>
-        Generating nonces in a nonrandom manner can cause leaks of private data
-        or enable tracking of clients as they move between networks.
+        Nonces are transmitted in the clear. For that reason, generating nonces
+        in a nonrandom manner can cause leaks of private data or enable tracking
+        of clients as they move between networks. Particular attention must be
+        given when nonces are generated by hashing user-provided data. This may,
+        for example, happen in timestamping applications. In such cases, the
+        data SHOULD be blinded by concatenating it with a securely generated
+        random string before the hash function is applied.
       </t>
     </section>
   </middle>
@@ -1042,7 +1085,6 @@ long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
     <references title="Informative References">
       <?rfc include="reference.RFC.0768.xml"?>
       <?rfc include='reference.RFC.0791.xml'?>
-      <?rfc include="reference.RFC.0793.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.4086.xml"?>
       <?rfc include="reference.RFC.5905.xml"?>
@@ -1050,6 +1092,7 @@ long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
       <?rfc include="reference.RFC.8174.xml"?>
       <?rfc include="reference.RFC.8573.xml"?>
       <?rfc include="reference.RFC.8915.xml"?>
+      <?rfc include="reference.RFC.9293.xml"?>
 
       <reference anchor="Autokey"
           target="https://zero-entropy.de/autokey_analysis.pdf">
@@ -1110,7 +1153,7 @@ long-term key: iBVjxg/1j7y1+kQUTBYdTabxCppesU/07D4PMDJk2WA=
               Network Time Security</xref></t>
           <t hangText="TAI   "><xref target="ITU-R_TF.460-6">International
               Atomic Time (Temps Atomique International)</xref></t>
-          <t hangText="TCP   "><xref target="RFC0793">Transmission Control
+          <t hangText="TCP   "><xref target="RFC9293">Transmission Control
               Protocol</xref></t>
           <t hangText="UDP   "><xref target="RFC0768">User Datagram Protocol
               </xref></t>
