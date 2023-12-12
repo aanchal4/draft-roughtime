@@ -10,7 +10,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="info" docName="draft-ietf-ntp-roughtime-06" ipr="trust200902">
+<rfc category="info" docName="draft-ietf-ntp-roughtime-08" ipr="trust200902">
   <front>
     <title>Roughtime</title>
 
@@ -36,7 +36,7 @@
     </author>
 
     <author fullname="Watson Ladd" initials="W." surname="Ladd">
-      <organization> Sealance, Inc.</organization>
+      <organization> Akamai Technologies</organization>
       <address>
         <email>watsonbladd@gmail.com</email>
       </address>
@@ -61,8 +61,8 @@
     <abstract>
       <t>
         This document specifies Roughtime - a protocol that aims to achieve
-        rough time synchronization while detecting servers that provide
-        inaccurate time and providing cryptographic proof of their malfeasance.
+        rough time synchronization even for clients without any idea of what time
+        it is.
       </t>
     </abstract>
   </front>
@@ -77,73 +77,9 @@
         <xref target="RFC5905"/> lack essential security features, and even
         newer protocols like Network Time Security (NTS)
         <xref target="RFC8915"/> lack mechanisms to ensure that the servers
-        behave correctly. Authenticating time servers prevents network
-        adversaries from modifying time packets, but an authenticated time
-        server still has full control over the contents of the time packet and
-        may transmit incorrect time. The Roughtime protocol provides
-        cryptographic proof of malfeasance, enabling clients to detect and prove
-        to a third party a server's attempts to influence the time a client
-        computes.
-      </t>
-      <table anchor="existing_approaches">
-        <name>Security Properties of current protocols.</name>
-        <tbody>
-          <tr>
-            <th>Protocol</th>
-            <th>Authenticated Server</th>
-            <th>Server Malfeasance Evidence</th>
-          </tr>
-          <tr><td>NTP, Chronos</td> <td>N</td>   <td>N</td></tr>
-          <tr><td>NTP-MAC</td>      <td>Y*</td>  <td>N</td></tr>
-          <tr><td>NTP-Autokey</td>  <td>Y**</td> <td>N</td></tr>
-          <tr><td>NTS</td>          <td>Y</td>   <td>N</td></tr>
-          <tr><td>Roughtime</td>    <td>Y</td>   <td>Y</td></tr>
-        </tbody>
-      </table>
-      <t>
-        Y* For security issues with symmetric-key based NTP-MAC authentication,
-        please refer to <xref target="RFC8573">RFC 8573</xref>.
-      </t>
-      <t>
-        Y** For security issues with Autokey Public Key Authentication, refer to
-        <xref target="Autokey"/>.
-      </t>
-      <t>
-        <list style="symbols">
-          <t>
-            If a server's timestamps do not fit into the time context
-            of other servers' responses, then a Roughtime client can
-            cryptographically prove this misbehavior to third
-            parties. This helps detect dishonest or malfunctioning
-            servers.
-          </t>
-          <t>
-            A Roughtime client can roughly detect (with no absolute
-            guarantee) a delay attack <xref target="DelayAttacks"/>
-            but can not cryptographically prove this to a third
-            party. However such attacks expand the round trip time
-            between request and response.
-          </t>
-          <t>
-            Note that delay attacks cannot be detected/stopped by any protocol.
-            Delay attacks can not, however, undermine the security guarantees
-            provided by Roughtime.
-          </t>
-          <t>
-            Although delay attacks cannot be prevented, they can be
-            limited to a predetermined upper bound. This can be done
-            by defining a maximal tolerable Round Trip Time (RTT)
-            value, MAX-RTT, that a Roughtime client is willing to
-            accept. A Roughtime client can measure the RTT of every
-            request-response handshake and compare it to MAX-RTT. If
-            the RTT exceeds MAX-RTT, the corresponding measurement is
-            discarded.  When this approach is used, the maximal time
-            error that can be caused by a delay attack is
-            MAX-RTT/2. It should be noted that this approach assumes
-            that the nature of the system is known to the client,
-            including reasonable upper bounds on the RTT value.
-          </t>
-        </list>
+        behave correctly. Furthermore clients may lack even a basic idea of the
+        time, creating bootstrapping problems. Roughtime uses a list of keys and
+        servers to resolve this issue.
       </t>
     </section>
 
@@ -286,21 +222,7 @@
 
         <section title="Timestamp">
           <t>
-            A timestamp is a uint64 interpreted in the following way. The most
-            significant 3 bytes contain the integer part of a Modified Julian
-            Date (MJD). The least significant 5 bytes is a count of the number
-            of microseconds since midnight on that day.
-          </t>
-          <t>
-            The MJD is the number of UTC days since 17 November 1858
-            <xref target="ITU-R_TF.457-2"/>. It is useful to note that 1 January
-            1970 is 40,587 days after 17 November 1858.
-          </t>
-          <t>
-            Note that, unlike NTP, this representation does not use the full
-            number of bits in the fractional part and that days with leap
-            seconds will have more or fewer than the nominal 86,400,000,000
-            microseconds.
+            A timestamp is a uint64 count of seconds since the Unix epoch in UTC.
           </t>
         </section>
       </section>
@@ -401,7 +323,7 @@
         </t>
         <t>
           The size of the request message SHOULD be at least 1024 bytes when
-          the UDP transport mode is used. To attain this size the PAD tag
+          the UDP transport mode is used. To attain this size the ZZZZ tag
           SHOULD be added to the message. Its value SHOULD be all zeros.
           Responding to requests shorter than 1024 bytes is OPTIONAL and
           servers MUST NOT send responses larger than the requests they are
@@ -483,42 +405,9 @@
           </t>
           <t>
             The RADI tag value MUST be a uint32 representing the server's
-            estimate of the accuracy of MIDP in microseconds. Servers MUST
+            estimate of the accuracy of MIDP in seconds. Servers MUST
             ensure that the true time is within (MIDP-RADI, MIDP+RADI) at the
             time they transmit the response message.
-          </t>
-          <t>
-            The DUT1 tag value MUST be an int32 indicating the predicted
-            difference between UT1 and UTC (UT1 - UTC) in milliseconds as given
-            by the International Earth Rotation and Reference Systems Service
-            (IERS).
-          </t>
-          <t>
-            The DTAI tag value MUST be an int32 indicating the current
-            difference between International Atomic Time (TAI) and UTC
-            (TAI - UTC) in milliseconds as published in the International Bureau
-            of Weights and Measures' (BIPM) Circular T.
-          </t>
-          <t>
-            The LEAP tag MUST contain zero or more int32 values, each
-            representing a past or future leap second event. Positive values
-            represent the addition of a second and negative values represent the
-            removal of a second. The absolute value represents the MJD of the
-            day that begins immediately after the leap second event.
-         </t>
-         <t>
-           By way of illustration, there was a leap second 31 December 2016
-           23:59:60. This event would be represented by the tag with numeric
-           value 57754. The positive sign represents that there was an
-           additional second inserted, the numeric value indicates 1 January
-           2017, the following day that began at midnight after the addition.
-         </t>
-         <t>
-           The leap second events MUST be sorted in reverse chronological order
-           and the first item MUST be the last (past or future) leap second
-           event that the server knows about. A LEAP tag with zero int32 values
-           indicates that the server does not hold any updated leap second
-           information.
           </t>
         </section>
         <section title="CERT">
@@ -683,6 +572,39 @@
       </t>
     </section>
 
+    <section title="Roughtime Clients">
+      <section title="Necessary configuration">
+        <t>To carry out a roughtime measurement a client must be equiped with a list of servers,
+        a minimum of three of which are operational, not run by the same parties. It must also have a
+        means of reporting to the provider of such a list, such as an OS vendor or software vendor,
+        a failure report as described below.
+        </t>
+      </section>
+      <section title="Measurement sequence">
+        <t>
+          The client randomly permutes three servers from the list, and seqeuntially queries them. The first probe uses a NONC
+          that is randomly generated. The second query uses H(resp||rand) where rand is a random 32 byte value and resp is the
+          entire response to the first probe. The third query uses H(resp||rand) for a different 32 byte value.
+        </t>
+        <t> If the times reported are consistent with the causal ordering, and the delay is within a system provided parameter,
+        the measurement succeeds. If they are not consistent, there has been malfeasance and the client SHOULD store a report
+        for evaluation, alert the operator, and make another measurement.
+        </t>
+      </section>
+      <section title="Malfeasence reporting">
+        <t>
+          A malfeasance report is a JSON object with keys "nonces" containing an array of the rand values as base64 encoded strings
+          and "responses" containing the responses as base64 encoded strings. This report is cryptographic proof that at least one server
+          generated an incorrect response.
+        </t>
+        <t>
+          Malfeasence reports MAY be transported by any means to the relevant vendor or server operator for discussion. A malfeasance report
+          is cryptographic proof that the responses arrived in that order, and can be used to demonstrate that a server sent the wrong time.
+          The venues for sharing such reports and what to do about them are outside the scope of this document.
+        </t>
+      </section>
+    </section>
+
     <section title="Roughtime Servers">
       <t>
         NOTE TO RFC EDITOR: remove this section before publication.
@@ -825,8 +747,8 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
             </tr>
 
             <tr>
-              <td>0x00444150</td>
-              <td>PAD</td>
+              <td>0x7a7a7a7a</td>
+              <td>ZZZZ</td>
               <td>[[this memo]]</td>
             </tr>
 
@@ -839,12 +761,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
             <tr>
               <td>0x00524556</td>
               <td>VER</td>
-              <td>[[this memo]]</td>
-            </tr>
-
-            <tr>
-              <td>0x31545544</td>
-              <td>DUT1</td>
               <td>[[this memo]]</td>
             </tr>
 
@@ -867,12 +783,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
             </tr>
 
             <tr>
-              <td>0x49415444</td>
-              <td>DTAI</td>
-              <td>[[this memo]]</td>
-            </tr>
-
-            <tr>
               <td>0x49444152</td>
               <td>RADI</td>
               <td>[[this memo]]</td>
@@ -881,12 +791,6 @@ long-term key: S3AzfZJ5CjSdkJ21ZJGbxqdYP/SoE8fXKY0+aicsehI=
             <tr>
               <td>0x4b425550</td>
               <td>PUBK</td>
-              <td>[[this memo]]</td>
-            </tr>
-
-            <tr>
-              <td>0x5041454c</td>
-              <td>LEAP</td>
               <td>[[this memo]]</td>
             </tr>
 
